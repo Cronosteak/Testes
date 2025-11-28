@@ -1,124 +1,94 @@
-import { defineStore } from "pinia";
-import { ref, nextTick, computed } from "vue";
-import { jobService } from "../api/jobService";
-import { sleep } from "../utils/util";
-import { JobFile } from "../interfaces/fiscalizacaoModels/job-file";
+<template>
+  <v-app>
+    <Navbar v-model:drawer="drawer"/>
+    <v-layout>
+      <Sidebar 
+        v-model="drawer"
+        :is-desktop="isDesktop"
+        :opcoes-menu-fiscalizacao="opcoesMenuFiscalizacao"
+        :opcoes-menu-automacao="opcoesMenuAutomacao"
+        />
+      <MainContent />
+      <ChatBot />
+    </v-layout>
+  </v-app>
+</template>
 
-export const useJobPollingStore = defineStore("jobPolling", () => {
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import Sidebar from '../components/layout/Sidebar.vue'
+import MainContent from '../components/layout/MainContent.vue'
+import Navbar from '../components/layout/Navbar.vue'
+import ChatBot from '../components/ui/ChatBot.vue'
+import { getIsOpenMenu } from '../utils/util'
+import { useJobPollingStore } from '../stores/jobPolling'
+import { storeToRefs } from 'pinia'
+import { watch } from 'vue'
 
-  const isPollingActive = ref(false);
-  const statusFile = ref("");
-  const stageFile = ref("");
-  const jobIdRuntime = ref("");
-  const relatorioFinalizado = ref(false);
-  const isGerandoAnalise = ref(false);
-  const isFailed = ref(false);
-  const currentJobFiles = ref<JobFile[]>([]);
+const jobPolling = useJobPollingStore();
+const { relatorioFinalizado, isGerandoAnalise, isPollingActive, isFailed } = storeToRefs(jobPolling);
 
-  let onCompleteCallback: ((jobId: string) => void) | null = null;
-  let onErrorCallback: ((message: string) => void) | null = null;
+const appendIcon = ref('');
 
-  async function start(jobId: string) {
-    try {
-      if (isPollingActive.value) return;
-      isPollingActive.value = false;
-      await nextTick();
-
-      isFailed.value = false;
-      isGerandoAnalise.value = true;
-      isPollingActive.value = true;
-  
-      let finished = false;
-      let errorCount = 0;
-  
-      while (isPollingActive.value && !finished) {
-        const result = await jobService.getJobById(jobId);
-  
-        if (!result.success) {
-          isFailed.value = true;
-          stop();
-          onErrorCallback?.(result.message ?? "Erro ao consultar job.");
-          return;
-        }
-  
-        statusFile.value = result.model.status;
-        stageFile.value = result.model.stage;
-  
-        if (statusFile.value === "completed" && stageFile.value === "done") {
-          finished = true;
-          relatorioFinalizado.value = true;
-          isGerandoAnalise.value = false;
-          jobIdRuntime.value = jobId;
-          localStorage.removeItem("currentJobId");
-          localStorage.removeItem("currentJobFiles");
-          stop();
-          onCompleteCallback?.(jobId);
-          break;
-        }
-  
-        if (statusFile.value === "failed" || stageFile.value === "error") {
-          errorCount++;
-          if (errorCount >= 3) {
-            isFailed.value = true;
-            localStorage.removeItem("currentJobId");
-            stop();
-            onErrorCallback?.(result.message ?? "A job falhou.");
-            return;
-          }
-        }
-  
-        for (let i = 0; i < 20; i++) {
-          if (!isPollingActive.value) return;
-          await sleep(1000);
-        }
-      }      
-    } catch (error) {
-      isFailed.value = true;
-      localStorage.removeItem("currentJobId");
-      statusFile.value = "failed"
-      stageFile.value = "error"
-      stop();
-      onErrorCallback?.("A job falhou.");
-      return;
-    }
+watch([isGerandoAnalise, relatorioFinalizado], () => {
+  if (isGerandoAnalise.value || isPollingActive.value) {
+    appendIcon.value = "mdi-loading mdi-spin";
+    return;
+  } else if (relatorioFinalizado.value && isFailed.value) {
+    appendIcon.value = "mdi-close-circle-outline";
+    return;
+  } else if (relatorioFinalizado.value && !isFailed.value) {
+    appendIcon.value = "mdi-check-circle-outline";
+    return;    
   }
 
-  function stop() {
-    currentJobFiles.value = [];    
-    relatorioFinalizado.value = true;
-    isPollingActive.value = false;
-    isGerandoAnalise.value = false;
+  appendIcon.value = "";
+}, { immediate: true });
+
+const opcoesMenuFiscalizacao = computed(() => [
+  ['Dashboard', 'mdi-account-multiple-outline', { name: 'dashboard' }],
+  ['Verificação de Documentos', 'mdi-account-multiple-outline', { name: 'verificacao-projeto' }, appendIcon.value],
+  ['Repositório de Verificações', 'mdi-cog-outline', {name: 'repositorio-verificacao'}],
+  ['Histórico', 'mdi-cog-outline', {name: 'historico-atividade'}],
+  ['Assistente Virtual', 'mdi-cog-outline', {name: 'chatbot'}],
+  // ['Configurações', 'mdi-cog-outline', {name: 'configuracoes'}],
+])
+
+const opcoesMenuAutomacao: any = [
+  // ['Banco de Dados', 'mdi-account-multiple-outline', {name: 'banco-de-dados'}],
+  ['Lista de Cargas Elétricas', 'mdi-account-multiple-outline', {name: 'lista-cargas'}],
+  // ['LC => CCM', 'mdi-account-multiple-outline', {name: 'lc-para-ccm'}],
+  // ['Teste1', 'mdi-cog-outline', {name: 'lista-equipamentos'}],
+  // ['Teste2', 'mdi-cog-outline', {name: 'lista-equipamentos'}],
+]
+
+const drawer = ref(getIsOpenMenu()) // update visual navbar
+// const drawer = ref(window.innerWidth >= 960) // menu aberto no desktop
+const isDesktop = ref(window.innerWidth >= 960)
+
+function handleResize() {
+  isDesktop.value = window.innerWidth >= 960
+
+  if (!isDesktop.value) {
+    localStorage.setItem('isOpenMenu', '0')
+    drawer.value = false
   }
+  // else drawer.value = true
+}
 
-  function onComplete(callback: (jobId: string) => void) {
-    onCompleteCallback = callback;
-  }
+onMounted(() => window.addEventListener('resize', handleResize))
+onBeforeUnmount(() => window.removeEventListener('resize', handleResize))
 
-  function onError(callback: (message: string) => void) {
-    onErrorCallback = callback;
-  }
+</script>
 
-  function loadCurrentJobFiles(): JobFile[] {
-    const savedJobFiles = localStorage.getItem("currentJobFiles");
-    if (savedJobFiles) {
-      currentJobFiles.value = JSON.parse(savedJobFiles);
-    }
 
-    return currentJobFiles.value;
-  }
+<style lang="scss">
 
-  return {
-    start,
-    stop,
-    statusFile,
-    stageFile,
-    relatorioFinalizado,
-    isGerandoAnalise,
-    jobIdRuntime,
-    isPollingActive,
-    onComplete,
-    onError,
-    isFailed,
-    loadCurrentJobFiles,
-  };
-});
+.v-list-item-title {
+    font-size: .8125rem !important;
+    font-weight: 500 !important;
+    letter-spacing: normal !important;
+    line-height: 1rem !important;
+}
+
+</style>
