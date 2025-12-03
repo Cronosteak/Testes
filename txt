@@ -1,580 +1,123 @@
-<template>
+import { defineStore } from "pinia";
+import { ref, nextTick, computed } from "vue";
+import { jobService } from "../api/jobService";
+import { hasValue, sleep } from "../utils/util";
+import { JobFile } from "../interfaces/fiscalizacaoModels/job-file";
 
-  <AppHeader :title="'Verificação de Documentos'"/>
-        
-  <v-stepper :editable="jobPolling.relatorioFinalizado" hide-actions style="margin-top: 20px;" v-model="step" :items="items" elevation="0">
-    <template v-slot:item.1> <!-- Stepper 1 (Mapeamento) -->
+export const useJobPollingStore = defineStore("jobPolling", () => {
 
-    <!-- Drag and Drop Zone -->
-    <div v-if="!jobPolling.relatorioFinalizado" class="drop-zone" @click="openFilePicker" @dragover.prevent="onDragOver" @dragenter.prevent="onDragEnter" @dragleave.prevent="onDragLeave" @drop.prevent="onDrop" :class="{ 'drag-hover': isDragOver }">
-      <input ref="fileInput" type="file" multiple style="display:none" @change="handleFileSelect" />
+  const isPollingActive = ref(false);
+  const statusFile = ref("");
+  const stageFile = ref("");
+  const jobIdRuntime = ref("");
+  const relatorioFinalizado = ref(false);
+  const isGerandoAnalise = ref(false);
+  const isFailed = ref(false);
+  const currentJobFiles = ref<JobFile[]>([]);
 
-      <div class="dz-content">
-        <v-icon size="30">mdi-upload</v-icon>
-        <p class="dz-title">Arraste seus arquivos ou clique para selecionar</p>
-      </div>
-    
-      <div v-if="isDragOver" class="drag-overlay"></div>
-    </div>
+  let onCompleteCallback: ((jobId: string, currentJobFiles: JobFile[]) => void) | null = null;
+  let onErrorCallback: ((message: string, currentJobFiles: JobFile[]) => void) | null = null;
 
-    <AppLoading title="Gerando Mapeamento" :is-visible="(isGerandoMapeamento && !mapeamentoGerado)"/>
+  async function start(jobId: string, savedJobFiles: JobFile[]) {
+    try {
+      if (isPollingActive.value) return;
+      isPollingActive.value = false;
+      await nextTick();
 
-    <v-card elevation="0" class="pa-4 bg-white rounded-lg" v-show="mapeamentoGerado">
-      
-      <v-data-table :loading="isGerandoMapeamento" hide-default-footer density="comfortable" fixed-header class="tw-w-full elevation-5" style="max-height: 400px; table-layout: fixed;">
-        <thead>
-          <v-progress-linear v-if="isGerandoMapeamento" indeterminate color="primary" height="3" style="margin: 0; position: absolute; top: 55px; width: 100%;"/>
-          <tr>
-            <th style="width: 60px;">
-              <v-checkbox color="white" v-model="selectAll" @update:model-value="toggleSelectAll" hide-details :disabled="jobPolling.relatorioFinalizado"></v-checkbox>
-            </th>
-            <th style="width: 200px; font-weight: 600 !important;">Arquivo (nome bruto)</th>
-            <th style="width: 250px; font-weight: bold !important;">Tipo de documento</th>
-            <th style="width: 150px; font-weight: bold !important;">Versão</th>
-            <!-- <th style="width: 150px; font-weight: bold !important;">Data do documento</th> -->
-          </tr>
-        </thead>
-      
-        <tbody>
-          <tr v-for="(file, i) in filesJob" :key="i">
-            <td> <v-checkbox hide-details v-model="selectedFilesJob" :value="file" :disabled="jobPolling.relatorioFinalizado"></v-checkbox> </td>
-            <td class="truncate-cell" :title="file.nome">
-              <div class="flex items-center gap-2">
-                {{ truncateText(file.nome, 40) }}
-              </div>
-            </td>
-            <td> {{ getLegendaTipoDocumento(file.tipo) }} </td>
-            <td> Versão {{ file.versao }} </td>
-            <!-- <td> {{ file.data }} </td> -->
-          </tr>
-        </tbody>
-      </v-data-table>
-      <div class="d-flex justify-space-between mt-4" v-if="!jobPolling.relatorioFinalizado">
-        <div class="d-flex gap-2">
-          <v-btn color="secondary" variant="text" @click="handleClickLimpaSelecao">Limpar seleção</v-btn>
-        </div>
-        <div class="flex justify-end">
-          <v-btn color="secondary" variant="outlined" @click="handleClickGerarAnalise" :disabled="jobPolling.isGerandoAnalise">Continuar análise ({{ selectedFilesJob.length }}) </v-btn>
-        </div>
-      </div>
-    </v-card>
-    </template>
-
-    <template v-slot:item.2 @click="handleSelectStepper(1)"> <!-- Stepper 2 (Resultado Análise) -->
-      <AppLoadingFile :title="'Status: ' + jobPolling.statusFile" :description="'Stage: ' + jobPolling.stageFile" :is-visible="(jobPolling.isGerandoAnalise)"/>
-
-      <v-card elevation="0" class="pa-6 mt-5 bg-white rounded-lg " v-show="jobPolling.relatorioFinalizado">
-        <v-card-title class="text-h6 font-bold pb-4"> Relatório de Verificação </v-card-title>
-
-        <v-card-text style="background-color: var(--surface-soft); min-height: 100px;" class="rounded-lg pa-5">
-          <p>
-            <strong>Arquivo(s): </strong>
-            <span>
-              <span v-for="(selectedFileJob, i) in selectedFilesJob" :key="i">
-                {{ selectedFileJob.nome }} <span v-if="i < selectedFilesJob.length - 1">, </span>
-              </span>
-            </span>
-          </p>
-          <p><strong>Status:</strong> {{getStageVerificacao(jobPolling.stageFile)}} </p>
-          <p><strong>Resumo:</strong> {{ selectedFilesJob.length }} arquivo(s) carregado(s) em {{getDataBR()}}.</p>
-        </v-card-text>
-        <template v-slot:actions>
-          <div class="flex flex-col justify-center items-center w-full mt-5">
-            <v-btn class="mb-5" color="primary" variant="flat" text="BAIXAR RELATÓRIO" @click="handleClickBaixarRelatorio" :disabled="isDownloadingReport" v-if="!jobPolling.isFailed || jobPolling.stageFile != 'error'"></v-btn>
-            <v-btn color="primary" variant="outlined" text="NOVA VERIFICAÇÃO" @click="handleClickNovaVerificacao"></v-btn>
-        </div>
-        </template>
-      </v-card>
-    </template>
-  </v-stepper>
+      isFailed.value = false;
+      isGerandoAnalise.value = true;
+      isPollingActive.value = true;
   
-</template>
-
-<script setup lang="ts">
-import { ref, computed, watch, onUnmounted, onMounted  } from 'vue'
-import { getDataBR, getDateISO } from '../../../utils/dateUtil';
-import { inject } from 'vue'
-import { ToastSymbol } from '../../../plugins/toast'
-import { type File } from '../../../interfaces';
-import AppHeader from '../../../components/ui/AppHeader.vue';
-import AppLoading from '../../../components/ui/AppLoading.vue';
-import { getLegendaTipoDocumento } from '../../../utils/util';
-import { JobFile } from '../../../interfaces/fiscalizacaoModels/job-file';
-import { EntityResult } from '../../../interfaces/entity-result';
-import { jobService } from '../../../api/jobService';
-import AppLoadingFile from '../../../components/ui/AppLoadingFile.vue';
-import { useJobPollingStore } from '../../../stores/jobPolling';
-import { onBeforeUnmount } from 'vue';
-
-const toast = inject(ToastSymbol) as any
-const step = ref(1)
-
-const fileInput = ref<HTMLInputElement | null>(null)
-const filesVerificacao = ref<File[]>([])
-const filesJob = ref<JobFile[]>([]);
-const selectedFilesJob = ref<JobFile[]>([])
-
-const isDownloadingReport = ref(false);
-
-// Opções de selects
-const items = ref(['Mapeamento', 'Resultado Análise'])
-const tipos = ref([
-  {tipoDocumento: 'LI', descricao: 'Lista de Cargas'},
-])
-
-const mapeamentoGerado = ref(false)
-const isGerandoMapeamento = ref(false)
-const selectAll = ref(false)
-const selectedFiles = ref<File[]>([])
-
-const isDragOver = ref(false)
-const dragCounter = ref(0)
-
-const selectedCount = computed(() => filesJob.value.length)
-
-const allowedTypes = [
-  'text/plain', // txt
-  'application/pdf', // pdf
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-  'application/msword', // doc
-]
-
-const jobPolling = useJobPollingStore()
-
-onMounted(() => {
-  getDateISO();
-
-  const savedJobId = localStorage.getItem("currentJobId");
-
-  // Entrando na tela em andamento - mostra o loading
-  if (savedJobId && !jobPolling.isFailed && !jobPolling.relatorioFinalizado) {
-    const savedJobFiles = jobPolling.loadCurrentJobFiles();
-    filesJob.value = [...savedJobFiles]
-    selectedFilesJob.value = [...savedJobFiles]
-    
-    jobPolling.start(savedJobId, savedJobFiles)
-    if (step.value < items.value.length) step.value++
-  }
-
-  // Entrando na tela com job finalizada - sucesso/falha
-  if (jobPolling.relatorioFinalizado) {
-    const savedJobFiles = jobPolling.loadCurrentJobFiles();
-    filesJob.value = [...savedJobFiles]
-    selectedFilesJob.value = [...savedJobFiles]
-    mapeamentoGerado.value = true;
-    if (step.value < items.value.length) step.value++
-  }
-
-})
-
-jobPolling.onComplete((jobId, savedJobFiles) => {
-  mapeamentoGerado.value = true;
-  filesJob.value = [...savedJobFiles]
-  selectedFilesJob.value = [...savedJobFiles]
-  toast.success("Relatório finalizado!");
-});
-
-jobPolling.onError((message, savedJobFiles) => {
-  mapeamentoGerado.value = true;
-  filesJob.value = [...savedJobFiles]
-  selectedFilesJob.value = [...savedJobFiles]
-  toast.error(message);
-  mapeamentoGerado.value = true;
-});
-
-onUnmounted(() => {
-  console.warn('⚠️ Componente desmontado!');
-});
-
-const handleFileSelect = async (event: Event) => {
-  const input = event.target as HTMLInputElement
-  const selected = input.files
-  analisaArquivos(selected);
-  input.value = ''
-}
-
-async function analisaArquivos(files: FileList) {
-  const filesList = Array.from(files)
-
-  if (!filesList) return
-
-  let invalidFiles: any[] = [];
-
-  isGerandoMapeamento.value = true;
-  for (const file of filesList) {
-    const validExtension = isAllowedExtension(file);
-
-    if (validExtension) {
-
-      const exists = filesJob.value.some((f) => f.nome === file.name);
-      if (!exists) {
-
-        // const resultInfoFile = await fileService.getInfoFile(file);
-
-        // Provisório enquanto não tem o endpoint de verificação;
-        const infoDoc = getInfoDocument(file.name);
-        if (infoDoc.error) { 
-          isGerandoMapeamento.value = false;
+      let finished = false;
+      let errorCount = 0;
+  
+      while (isPollingActive.value && !finished) {
+        const result = await jobService.getJobById(jobId);
+  
+        if (!result.success) {
+          isFailed.value = true;
+          stop();
+          onErrorCallback?.(result.message ?? "Erro ao consultar job.", savedJobFiles);
           return;
         }
-
-        const resultInfoFile: EntityResult<any> = {
-          message: "",
-          success: true,
-          model: infoDoc
-        };
-        // ------
-
-        if (!resultInfoFile.success) {
-          toast.warning(resultInfoFile.message);
-          continue;
-        }
-
-        if (!isValidFile(infoDoc)) {
-          toast.warning(`Arquivo do tipo ${infoDoc.tipoDocumento} é inválido.`);
-          if (mapeamentoGerado.value == false) { limpaCampos(); }
-          isGerandoMapeamento.value = false;
-          return;
-        }
-
-        // if (!isValidFile(resultInfoFile.model)) {
-        //   toast.warning(`Arquivo do tipo ${resultInfoFile.model.tipo} é inválido.`);
-        //   if (mapeamentoGerado.value == false) { limpaCampos(); }
-        //   return;
-        // }
-
-        filesJob.value.push({
-          nome: file.name,
-          tipo: resultInfoFile.model.tipoDocumento,
-          tipoDesc: tipos.value.filter(x => x.tipoDocumento == resultInfoFile.model.tipoDocumento)[0].descricao,
-          versao: resultInfoFile.model.versao,
-          data: getDataBR(),
-          status: 'idle',
-          file: file
-        });
-
-      } else {
-        toast.warning(`Arquivo ${file.name} já adicionado!`);
-        isGerandoMapeamento.value = false;
-        return;
-      }
-
-    } else {
-      invalidFiles.push({ name: file.name });
-    }
-  }
-
-  isGerandoMapeamento.value = false;
-
-  if (Array.from(invalidFiles).length > 0) {
-    toast.warning(`Os seguintes arquivos não são permitidos: ${invalidFiles.map(f => f.name).join(', ')}`)
-    return;
-  }
-
-  handleClickGerarMapeamento();
-}
-
-function getInfoDocument(name: string): {tipoDocumento: string, versao: string, error: boolean} {
-  try {
-    const tipoDocumento = name.split('-')[0];
-    const versao = name.split('=')[1].substring(0,1);
-
-    if (!tipoDocumento || !versao) {
-      toast.warning(`Arquivo ${name} inválido.`);
-      return {tipoDocumento: '', versao: '', error: true};
-    }
-
-    return {tipoDocumento, versao, error: false}
-
-  } catch (error) {
-    toast.error(
-      `Ocorreu um erro ao incluir o documento <b>${name}</b>.<br>Verifique e tente novamente!`,
-      { dangerouslyHTMLString: true }
-    );
-    return {tipoDocumento: '', versao: '', error: true}
-  }
-}
-
-const handleClickGerarMapeamento = () => {
-  if (!filesJob || filesJob.value.length === 0) {
-    toast?.warning('Inclua pelo menos um arquivo!')
-    return
-  }
-
-  // if (!filesVerificacao || filesVerificacao.value.length === 0) {
-  //   toast?.warning('Inclua pelo menos um arquivo!')
-  //   return
-  // }
-
-  mapeamentoGerado.value = true;
-}
-
-const handleClickGerarAnalise = async() => {
-  if (!selectedFilesJob.value || selectedFilesJob.value.length === 0) {
-    toast?.warning('Selecione pelo menos um arquivo!')
-    return
-  }
   
-  jobPolling.isGerandoAnalise = true
-  await createJob();
-}
-
-async function createJob() {
-  try {
-    const formData = new FormData();
-    formData.append("file", selectedFilesJob.value[0].file);
-
-    const resultJob = await jobService.createJob(formData);
-
-    if (!resultJob.success) {
-      toast.warning("Não foi possível analisar o documento.");
-    }
-
-    localStorage.setItem("currentJobId", resultJob.model.job_id);
-    localStorage.setItem("currentJobFiles", JSON.stringify(selectedFilesJob.value));
-
-    jobPolling.start(resultJob.model.job_id, selectedFilesJob.value);
-    
-    if (step.value < items.value.length) step.value++
-  } catch (error) {
-    jobPolling.isGerandoAnalise = false;
-    toast.error("Ocorreu um erro ao criar job de verificação.")
-  }
-}
-
-async function handleClickBaixarRelatorio() {
-  try {
-    isDownloadingReport.value = true;
-    const response = await jobService.getReportJob(jobPolling.jobIdRuntime);
-
-    const blob = new Blob([response.data], {
-      type: response.headers["content-type"] || "application/octet-stream",
-    });
-
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-
-    let fileName = "arquivo";
-
-    const header = response.headers["content-disposition"];
-    if (header) {
-      const match = header.match(/filename\*?=(?:UTF-8'')?"?([^"]+)"?/);
-      if (match && match[1]) {
-        fileName = decodeURIComponent(match[1]);
-      }
-    }
-
-    link.download = fileName;
-    link.click();
-
-    window.URL.revokeObjectURL(url);
-    isDownloadingReport.value = false;
-  } 
-  catch (error) {
-    isDownloadingReport.value = false;
-    toast.error("Não foi possível baixar o relatório.")
-    if (error.response && error.response.data) {
-      console.error("Resposta da API:", error.response.data);
-    }
-  }
-}
-
-//#region Drag and Drop
-function onDrop(event: DragEvent) {
-  dragCounter.value = 0
-  isDragOver.value = false
-
-  if (!event.dataTransfer?.files) return
-
-  processFilesDragOnDrop(event.dataTransfer.files)
-}
-
-async function processFilesDragOnDrop(fileList: FileList) {
-  analisaArquivos(fileList);
-}
-
-function onDragEnter() {
-  dragCounter.value++
-  isDragOver.value = true
-}
-
-function onDragLeave() {
-  dragCounter.value--
-  if (dragCounter.value === 0) {
-    isDragOver.value = false
-  }
-}
-
-function onDragOver() {
-}
-
-//#endregion
-
-//#region Utils
-
-function toggleSelectAll(value: boolean) {
-  if (value) {
-    selectedFilesJob.value = [...filesJob.value]
-  } else {
-    selectedFilesJob.value = []
-  }
-}
-
-watch(selectedFilesJob, (newVal) => {
-  if (filesJob.value.length > 0) {
-    selectAll.value = newVal.length === filesJob.value.length
-  }
-})
-
-function handleClickLimpaSelecao() {
-  selectedFilesJob.value = []
-}
-
-function handleClickNovaVerificacao() {
-  limpaCampos()
-}
-
-function limpaCampos() {
-  filesJob.value = []
-  selectAll.value = false
-  selectedFilesJob.value = []
-  mapeamentoGerado.value = false
-  jobPolling.relatorioFinalizado = false
-  localStorage.removeItem("currentJobId");
-  localStorage.removeItem("currentJobFiles");  
-  step.value = 1;
-}
-
-
-function truncateText(text: string, maxLength: number) {
-  if (!text) return ''
-  return text.length > maxLength ? text.slice(0, maxLength) + '…' : text
-}
-
-function isValidFile(infoDoc: any): boolean {
-  if (!['INT', 'LI', 'MD'].includes(infoDoc.tipoDocumento)) {
-    return false;
-  }
-
-  return true;
-}
-
-const openFilePicker = () => {
-  fileInput.value?.click()
-}
-
-function getExtension(name: string) {
-  return name.split('.').pop()?.toLowerCase() ?? '';
-}
-
-function isAllowedExtension(file: any) {
-  if (file.type) {
-    if (allowedTypes.includes(file.type)) return true;
-  }
-
-  const ext = getExtension(file.name);
-  return ['pdf', 'docx', 'doc', 'txt'].includes(ext);
-}
-
-function getStageVerificacao(stage: string) {
-  switch (stage) {
-    case 'done':
-      return "Verificado com sucesso."
-    case 'error':
-      return "Ocorreu um erro na verificação."
+        statusFile.value = result.model.status;
+        stageFile.value = result.model.stage;
   
-    default:
-      break;
+        if (statusFile.value === "completed" && stageFile.value === "done") {
+          finished = true;
+          onCompleteCallback?.(jobId, savedJobFiles);
+          relatorioFinalizado.value = true;
+          isGerandoAnalise.value = false;
+          jobIdRuntime.value = jobId;
+          localStorage.removeItem("currentJobId");
+          stop();
+          break;
+        }
+  
+        if (statusFile.value === "failed" || stageFile.value === "error") {
+          errorCount++;
+          if (errorCount >= 3) {
+            isFailed.value = true;
+            localStorage.removeItem("currentJobId");
+            stop();
+            onErrorCallback?.(result.message ?? "A job falhou.", savedJobFiles);
+            return;
+          }
+        }
+  
+        for (let i = 0; i < 20; i++) {
+          if (!isPollingActive.value) return;
+          await sleep(1000);
+        }
+      }      
+    } catch (error) {
+      isFailed.value = true;
+      localStorage.removeItem("currentJobId");
+      statusFile.value = "failed"
+      stageFile.value = "error"
+      stop();
+      onErrorCallback?.("A job falhou.", savedJobFiles);
+      return;
+    }
   }
-}
 
-//#endregion
+  function stop() {
+    currentJobFiles.value = [];    
+    relatorioFinalizado.value = true;
+    isPollingActive.value = false;
+    isGerandoAnalise.value = false;
+  }
 
-</script>
+  async function onComplete(callback: (jobId: string, savedJobFiles: JobFile[]) => void) {
+    onCompleteCallback = callback;
+  }
 
-<style lang="css">
+  function onError(callback: (message: string, savedJobFiles: JobFile[]) => void) {
+    onErrorCallback = callback;
+  }
 
-.truncate-cell {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 220px;
-}
+  function loadCurrentJobFiles(currentJobFilesGotten?: string): JobFile[] {
+    const savedJobFiles = hasValue(localStorage.getItem("currentJobFiles")) ? localStorage.getItem("currentJobFiles") : currentJobFilesGotten;
+    if (savedJobFiles) {
+      currentJobFiles.value = JSON.parse(savedJobFiles);
+    }
 
-tr {
-  transition: background-color 0.4s ease, opacity 0.3s ease;
-}
+    return currentJobFiles.value;
+  }
 
-.v-stepper-window {
-  margin: 0px !important;
-}
-
-.v-stepper-header {
-  box-shadow: none !important;
-}
-
-.drop-zone {
-  background: #f9fafb;
-  border: 2px dashed #cbd5e1;
-  border-radius: 20px;
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  margin-left: 15px;
-  margin-right: 15px;
-  width: 500px;
-}
-
-.drop-zone:hover {
-  background: #f3f4f6;
-  border-color: #94a3b8;
-}
-
-.drop-zone.drag-hover {
-  border-color: #2563eb;
-  background: #dbeafe;
-}
-
-.dz-content v-icon {
-  opacity: 0.7;
-}
-
-.dz-content {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.dz-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.dz-subtitle {
-  font-size: 15px;
-  color: #6b7280;
-}
-
-.drag-overlay {
-  width: 500px;
-  position: absolute;
-  inset: 0;
-  background: rgba(37, 99, 235, 0.15);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  font-weight: bold;
-  color: #1d4ed8;
-  pointer-events: none;
-  margin-left: 15px;
-  margin-right: 15px;
-}
-
-</style>
+  return {
+    start,
+    stop,
+    statusFile,
+    stageFile,
+    relatorioFinalizado,
+    isGerandoAnalise,
+    jobIdRuntime,
+    isPollingActive,
+    onComplete,
+    onError,
+    isFailed,
+    loadCurrentJobFiles,
+  };
+});
