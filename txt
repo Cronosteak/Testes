@@ -1,3 +1,20 @@
+import { File, Projeto } from '../interfaces'
+import { EntityResult } from '../interfaces/entity-result'
+import { RepositorioVerificacao } from '../interfaces/repositorio-verificacao'
+import { dataInicioMaiorFinal } from '../utils/dateUtil'
+import http from './http'
+
+interface FetchParams {
+  page: number
+  itemsPerPage: number
+  sortBy: { key: string; order: 'asc' | 'desc' }[]
+  search?: string,
+  tipo: string
+}
+
+export const repositorioVerificacaoService = {
+  // Endpoint homologacao
+
   async update(rule_id: string, updated_rule: RepositorioVerificacao): Promise<EntityResult<RepositorioVerificacao>> {
     const result = await http.put<EntityResult<RepositorioVerificacao>>(`/rules/lista_cargas/instructions/${rule_id}`, updated_rule);
     return result.data;
@@ -8,285 +25,91 @@
     return data
   },
 
+  async getOriginalRuleById(rule_id: string): Promise<EntityResult<RepositorioVerificacao>> {
+    const { data } = await http.get(`/verifications/original/${rule_id}`);
+    return data;
+  },
 
-export interface RepositorioVerificacao {
-  id?: number
-  // homologacao
-  instruction: string
-  description: string
-  tags: string[],
-  document: string
+  // Endpoints Mockup
+  async getAllMockup(): Promise<RepositorioVerificacao[]> {
+    const { data } = await http.get('/repositorio-verificacao')
+    return data
+  },
 
-  // mockup
-  tipo: string
-  texto: string
-  tipoVerificacao: string
-  etiquetas: string
-  obs: string
-  comportamento: string
-}
+  async getByTipo(tipo: string): Promise<RepositorioVerificacao[]> {
+    const { data } = await http.get('/repositorio-verificacao')
+    return data.filter(x => x.tipo === tipo);
+  },
 
-<template>
+  async buscarPorId(id: number): Promise<File> {
+    const { data } = await http.get(`/projetos/${id}`)
+    return data
+  },
 
-  <AppHeader :title="'Repositório de Verificações'"/>
+  async buscarPorDataTipoDocumento(dataInicio: string, dataFim: string, tipoDocumento: string): Promise<Projeto[]> {
+    try {
+      let { data } = await http.get('/projetos');
 
-  <div class="pt-6 grid grid-cols-3 gap-4">
-      <v-select :disabled="isLoading" label="Tipo de Documento" :items="tipos" item-value="tipoDocumento" item-title="descricao" variant="outlined" @update:modelValue="handleChangeSelect($event)"></v-select>
-  </div>
 
-  <!-- Loading só aparece na primeira pesquisa -->
-  <AppLoading title="Buscando verificações" :is-visible="(!pesquisaRealizada && isLoading)"/>
 
-  <v-card elevation="1" v-if="pesquisaRealizada" style="margin-top: 24px;">
-
-    <v-expand-transition>
-      <div v-if="showSearch">
-        <v-text-field class="ma-4" v-model="search" label="Pesquisar" prepend-inner-icon="mdi-magnify" variant="outlined" hide-details dense ></v-text-field>
-      </div>
-    </v-expand-transition>    
-
-    <!-- <v-data-table-server
-      v-model:page="page"
-      v-model:items-per-page="itemsPerPage"
-      :headers="headers"
-      :items="itemsDataTable"
-      :items-length="totalItems"
-      :search="search"
-      no-data-text="Nenhum resultado obtido"
-      loading-text="Carregando items, por favor aguarde..."
-      :loading="isLoading"
-      @update:options="loadFiles"
-      style="max-height: 500px; overflow: auto;"
-      fixed-header 
-      fixed-footer> -->
-
-      <v-data-table :items="itemsDataTable" :headers="headers" :items-per-page="5" :search="search">
-
-      <template v-slot:header.actions>
-        <div class="d-flex justify-center align-center">
-          <v-icon icon="mdi-magnify" size="20" class="cursor-pointer" color="white" @click.stop="showSearch = !showSearch"></v-icon>
-        </div>
-      </template>
-      
-      <template v-slot:item.actions="{ item }">
-        <div class="d-flex ga-2 ml-3">
-          <v-icon color="medium-emphasis" icon="mdi-pencil" size="small" @click="dialogRef.open(item)"></v-icon>
-        </div>
-      </template>
-    </v-data-table>
-
-    <DialogRepositorioVerificacao ref="dialogRef" @updated="onUpdated"/>
-  </v-card>
-
-</template>
-
-<script setup lang="ts">
-import { ref, inject  } from 'vue'
-import { ToastSymbol } from '../../../plugins/toast';
-import AppHeader from '../../../components/ui/AppHeader.vue';
-import AppLoading from '../../../components/ui/AppLoading.vue';
-import { repositorioVerificacaoService } from '../../../api/repositorioVerificacaoService';
-import { RepositorioVerificacao } from '../../../interfaces/repositorio-verificacao';
-import DialogRepositorioVerificacao from './DialogRepositorioVerificacao.vue';
-
-const toast = inject(ToastSymbol) as any
-
-const itemsDataTable = ref<RepositorioVerificacao[]>([])
-const itemsPerPage = ref(10)
-const isVisible = ref(false);
-const isLoading = ref(false);
-const totalItems = ref(0)
-const search = ref('');
-const page = ref(1)
-const pesquisaRealizada = ref(false)
-const dialogRef = ref()
-const showSearch = ref(false)
-
-const tipoDocumentoSelected = ref('');
-
-const tipos = ref([
-  {tipoDocumento: 'LI', descricao: 'Lista de Cargas'},
-  // {tipoDocumento: 'INT', descricao: 'Interna Memória de Cálculo'},
-  // {tipoDocumento: 'MD', descricao: 'Memorial Descritivo'}
-  // 'Lista de Cargas', 'Lista de Equipamentos', 'Lista de Equipamentos e Cargas Elétricas', 'Diagrama Unifilar', 'Memorial Descritivo', 'Outro'
-])
-
-const headers: any = [
-  { align: 'start', key: 'id', sortable: false, title: 'Id', width: '11%'},
-  { align: 'start', key: 'description', sortable: true, title: 'Verificação', width: '70%' },
-  { align: 'start', key: 'document', sortable: true, title: 'Documento Fonte' },
-  // { align: 'start', key: 'data', sortable: true, title: 'Data do Documento' },
-  { align: 'start', key: 'actions', title: '', sortable: false },
-]
-
-async function handleChangeSelect(event: any) {
-  try {
-
-    isLoading.value = true;
-    const resultRepositorio = await repositorioVerificacaoService.getAll();
-    isLoading.value = false;
-
-    if (!resultRepositorio.success) {
-      toast.warning("Não foi possível carregar as verificações.");
-      pesquisaRealizada.value = false;
-      return;
+      data = data.filter((x: {data: string}) => x.data >= dataInicio && x.data <= dataFim);
+      return data;      
+    } catch (error) {
+      throw error;
     }
+  },
 
-    // isLoading.value = true;
-    // await new Promise(resolve => setTimeout(resolve, 2000));
-    // const { items, total }: any = await repositorioVerificacaoService.getSeverSide({page: 1, itemsPerPage: itemsPerPage.value, sortBy: [], search: search.value, tipo: event});
-    // isLoading.value = false;
+  async criar(projeto: Projeto): Promise<Projeto> {
+    const { data } = await http.post('/projetos', projeto)
+    return data
+  },
 
-    // if (total == 0) {
-    //   toast.info("Nenhum resultado obtido.");
-    //   pesquisaRealizada.value = false;
-    //   return;
-    // }
-    
-    itemsDataTable.value = resultRepositorio.model;
-    totalItems.value = resultRepositorio.model.length;
-    isVisible.value = true;
-    tipoDocumentoSelected.value = event;
-    pesquisaRealizada.value = true;
-  } catch (error) {
-    isLoading.value = false;
-    toast.error("Ocorreu um erro ao realizar a pesquisa.");
-    console.log(error);
-  }
+  async atualizar(arquivo: File): Promise<File> {
+    const { data } = await http.put(`/projetos/${arquivo.id}`, arquivo)
+    return data
+  },
+
+  async deletar(id: number): Promise<void> {
+    await http.delete(`/projetos/${id}`)
+  },
+
+  async getSeverSide({ page, itemsPerPage, sortBy, search, tipo }: FetchParams) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await new Promise(resolve => setTimeout(resolve, 400));
+        let filtered = await this.getByTipo(tipo);
+
+        if (search) {
+          filtered = filtered.filter((file) => 
+            file?.id?.toLowerCase().includes(search.toLowerCase())
+            || file?.texto?.toLowerCase().includes(search.toLowerCase())
+            || file?.documentoFonte?.toLowerCase().includes(search.toLowerCase())
+        )
+        }
+
+        if (sortBy.length) {
+          const { key, order } = sortBy[0]
+          filtered.sort((a, b) => { 
+            const aVal = a[key] 
+            const bVal = b[key]
+            if (typeof aVal === 'string') {
+              return order === 'asc' ? aVal?.localeCompare(bVal) : bVal?.localeCompare(aVal)
+            } else {
+              return order === 'asc' ? aVal - bVal : bVal - aVal
+            }
+          })
+        }
+
+        const start = (page - 1) * itemsPerPage
+        const end = start + itemsPerPage
+        const paginated = filtered.slice(start, end)
+
+        resolve({ items: paginated, total: filtered.length })
+      } catch (error) {
+        console.log(error);
+        return reject(error);
+      }
+    })
+  },
 
 }
-
-async function loadFiles({ page, itemsPerPage, sortBy }) {
-  try {
-    isLoading.value = true
-    const { items, total }: any = await repositorioVerificacaoService.getSeverSide({page, itemsPerPage, sortBy, search: search.value, tipo: tipoDocumentoSelected.value});
-    itemsDataTable.value = items
-    totalItems.value = total
-    isLoading.value = false
-  } catch (error) {
-    toast.error("Ocorreu um erro ao realizar a pesquisa.");
-    console.log(error);    
-  }
-
-}
-
-function onUpdated(updatedItem) {
-  const index = itemsDataTable.value.findIndex(i => i.id === updatedItem.id);
-  if (index !== -1) {
-    itemsDataTable.value[index] = { ...updatedItem };
-  }
-}
-
-</script>
-
-<style lang="css">
-
-</style>
-
-<template>
-    <v-dialog v-model="dialog" max-width="1500" min-height="300" max-height="650">
-
-      <v-card prepend-icon="mdi-file" :title="repositorioVerificacao.id" >
-        <v-card-text style="padding-top: 15px; padding-bottom: 5px;">
-          <v-row dense>
-            <v-col cols="12" md="12" sm="12">
-                <v-textarea v-model="repositorioVerificacao.description" label="Verificação" variant="outlined" rows="3" resize></v-textarea>
-            </v-col>
-
-            <v-col cols="12" md="12" sm="12">
-                <v-textarea v-model="repositorioVerificacao.instruction" label="Instrução" variant="outlined" rows="4" no-resize></v-textarea>
-            </v-col>
-
-            <v-col cols="6" md="6" sm="6">
-                <v-select v-model="repositorioVerificacao.tipoVerificacao" label="Tipo de Verificação" :items="tiposDeVerificacao" variant="outlined"></v-select>
-            </v-col>
-
-            <v-col cols="6" md="6" sm="6" >
-                <v-select multiple v-model="repositorioVerificacao.tags" label="Etiqueta(s)" :items="etiquetas" item-value="value" item-title="label" variant="outlined"></v-select>
-            </v-col>
-            
-            <!-- 
-            <v-col cols="12" md="12" sm="12">
-                <v-textarea :model-value="repositorioVerificacao.obs" label="Observação" variant="outlined" rows="4" no-resize></v-textarea>
-            </v-col> -->
-
-          </v-row>
-
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-
-          <v-btn text="FECHAR" variant="plain" @click="dialog = false"></v-btn>
-
-          <v-btn text="SALVAR" color="primary" variant="tonal" @click="handleClickSalvarRule"
-          ></v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-</template>
-<script setup lang="ts">
-import { inject, ref } from 'vue'
-import  { type RepositorioVerificacao } from '../../../interfaces/repositorio-verificacao';
-import { repositorioVerificacaoService } from '../../../api/repositorioVerificacaoService';
-import { ToastSymbol } from '../../../plugins/toast';
-
-const toast = inject(ToastSymbol) as any
-
-const dialog = ref(false)
-const repositorioVerificacao = ref<RepositorioVerificacao>()
-const tiposDeVerificacao = ref(['Interna'])
-const etiquetas = ref([
-  { label: 'Titulo', value: 'title' },
-  { label: 'Codigo', value: 'code' },
-  { label: 'Capa', value: 'layer' },
-  { label: 'Formato', value: 'format' },
-  { label: 'Rev', value: 'rev' },
-  { label: 'Ref. Doc', value: 'ref_doc' },
-  { label: 'Gen Notes', value: 'gen_notes' },
-  { label: 'Page Number', value: 'page_num' },
-  { label: 'Legenda', value: 'legenda' },
-  { label: 'Painel', value: 'panel' },
-  { label: 'CDC', value: 'cdc' },
-  { label: 'CCM', value: 'ccm' },
-  { label: 'CF', value: 'cf' },
-  // 'title', 'code', 'layer', 'format'
-  // 'Titulo', 'Codigo', 'Capa', 'Formato', 'Rev', 'Painel', 'CDC', 'CCM', 'Emergência', 'CF'
-])
-
-function open(repo: RepositorioVerificacao) {
-    console.log(repositorioVerificacao)
-    repositorioVerificacao.value = repo;
-    dialog.value = true
-}
-
-defineExpose({ open })
-const emit = defineEmits(["updated"])
-
-async function handleClickSalvarRule() {  
-  try {
-    const resultUpdateRule = await repositorioVerificacaoService.update(repositorioVerificacao.value.id.toString(), repositorioVerificacao.value)
-
-    if (!resultUpdateRule.success) {
-      toast.warning(resultUpdateRule.message ?? "Não foi possível atualizar verificação!");
-    }
-
-    toast.success(`Verificação ${repositorioVerificacao.value.id} atualizada com sucesso!`);
-    emit("updated", repositorioVerificacao.value);
-    dialog.value = false
-  } catch (error) {
-    
-  }
-}
-</script>
-
-<style>
-
-.v-card-item {
-    background-color: var(--primary-brand);
-    color: white;
-}
-
-</style>
