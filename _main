@@ -1,0 +1,346 @@
+# app/main.py
+
+# ==========================================
+# 1. IMPORTS
+# ==========================================
+import json
+from pathlib import Path
+from typing import Generic, Optional, TypeVar
+from uuid import uuid4
+
+from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+
+# Internal Imports
+from .logging_config import logger
+from .config import JOBS_DIR
+from .jobs import create_job, load_job
+from .pipeline import run_full_pipeline
+from .chat_service import generate_answer_stream
+
+# ==========================================
+# 2. CONFIGURATION & CONSTANTS
+# ==========================================
+BASE_DIR = Path(__file__).resolve().parents[1]
+CONFIGS_DIR = BASE_DIR / "configs"
+RULES_FILE = BASE_DIR / "configs" / "rules_lista_cargas.json"
+CUSTOM_RULES_FILE = BASE_DIR / "configs" / "rules_lista_cargas_custom.json"
+
+# ==========================================
+# 3. PYDANTIC MODELS (SCHEMAS)
+# ==========================================
+T = TypeVar("T")
+
+class EntityResult(BaseModel, Generic[T]):
+    """Generic wrapper for API responses"""
+    success: bool
+    message: str
+    model: Optional[T] = None
+
+class JobStatusResponse(BaseModel):
+    """Schema for Job Status"""
+    job_id: str
+    status: str
+    stage: str
+    message: str | None = None
+    original_filename: str
+
+class VerificationInstruction(BaseModel):
+    """Schema for Rule Instructions"""
+    id: str | None = None
+    instruction: str | None = None
+    description: str | None = None
+    tags: list[str] | None = None
+    document: str | None = None
+    isAdded: bool | None = None    
+
+# ==========================================
+# 4. APP INITIALIZATION & MIDDLEWARE
+# ==========================================
+app = FastAPI(
+    title="Executive Projects Documents Verification API",
+    version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # libera qualquer origem
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ==========================================
+# 5. ENDPOINTS: JOB MANAGEMENT
+# ==========================================
+
+@app.post("/jobs", response_model=EntityResult[JobStatusResponse])
+async def create_job_endpoint(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+):
+    """
+    1) Create a job
+    2) Save the PDF to data/jobs/{job_id}/raw
+    3) Launch the pipeline in the background
+    """
+    logger.info("FastAPI application starting")
+    job_id = str(uuid4())
+    job = create_job(job_id, original_filename=file.filename)
+
+    raw_dir = JOBS_DIR / job_id / "raw"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    dest = raw_dir / "input.pdf"  
+
+    content = await file.read()
+    with dest.open("wb") as f:
+        f.write(content)
+
+    background_tasks.add_task(run_full_pipeline, job_id)
+
+    return EntityResult[JobStatusResponse](
+        success=True,
+        message="Job created successfully",
+        model=JobStatusResponse(
+            job_id=job.job_id,
+            status=job.status,
+            stage=job.stage,
+            message=job.message,
+            original_filename=job.original_filename,
+        ),
+    )
+
+@app.get("/jobs/{job_id}", response_model=EntityResult[JobStatusResponse])
+def get_job_status(job_id: str):
+    """
+    Get the status of a job.
+    """
+    job = load_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    return EntityResult[JobStatusResponse](
+        success=True,
+        message="Job status retrieved successfully",
+        model=JobStatusResponse(
+            job_id=job.job_id,
+            status=job.status,
+            stage=job.stage,
+            message=job.message,
+            original_filename=job.original_filename,
+        ),
+    )
+
+@app.get("/jobs/{job_id}/report")
+def download_report(job_id: str):
+    """
+    Download the final report of a job, once it is completed.
+    """
+    job = load_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    if job.status != "completed":
+        raise HTTPException(status_code=409, detail="Report not ready yet")
+
+    report_path = job.report_file
+    if report_path is None or not report_path.exists():
+        raise HTTPException(status_code=404, detail="Report file not found")
+
+    suffix = report_path.suffix.lower()
+    media_type = "application/octet-stream"
+    if suffix == ".pdf":
+        media_type = "application/pdf"
+    elif suffix == ".txt":
+        media_type = "text/plain"
+    elif suffix in {".md", ".markdown"}:
+        media_type = "text/markdown"
+
+    return FileResponse(
+        path=report_path,
+        filename=report_path.name,
+        media_type=media_type,
+    )
+
+# ==========================================
+# 6. ENDPOINTS: RULES CONFIGURATION
+# ==========================================
+
+@app.get(
+    "/rules/lista_cargas/instructions",
+    response_model=EntityResult[list[VerificationInstruction]],
+)
+def get_lista_cargas_instructions():
+    """
+    Returns only the id and instruction of each verification.
+    """
+    if not RULES_FILE.exists():
+        raise HTTPException(status_code=500, detail="rules_lista_cargas.json not found")
+
+    with RULES_FILE.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    verifications = data.get("verifications", [])
+    result = [
+        VerificationInstruction(
+            id=v.get("id"),
+            instruction=v.get("instruction"),
+            description=v.get("description"),
+            tags=v.get("tags"),
+        )
+        for v in verifications
+    ]
+
+    return EntityResult[list[VerificationInstruction]](
+        success=True,
+        message="Verification instructions retrieved successfully",
+        model=result,
+    )
+
+@app.post("/verifications", response_model=EntityResult[VerificationInstruction])
+def add_verification(rule: VerificationInstruction):
+    """
+    Add a new verification rule to the custom JSON file.
+    The original `rules_lista_cargas.json` file is never modified.
+    """
+
+    CONFIGS_DIR.mkdir(parents=True, exist_ok=True)
+
+    if CUSTOM_RULES_FILE.exists():
+        try:
+            data = json.loads(CUSTOM_RULES_FILE.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            data = {"document_name": "Lista de Cargas (custom)", "verifications": []}
+    else:
+        if RULES_FILE.exists():
+            try:
+                original_data = json.loads(RULES_FILE.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                original_data = {"document_name": "Lista de Cargas (original)", "verifications": []}
+        else:
+            original_data = {"document_name": "Lista de Cargas (original)", "verifications": []}
+
+        data = {
+            "document_name": "Lista de Cargas (custom)",
+            "verifications": original_data.get("verifications", []),
+        }
+
+    verifications = data.setdefault("verifications", [])
+
+    # Gerar ID se não vier do frontend
+    if not rule.id:
+        # geramos um ID simples incremental baseado nos existentes no custom.
+        existing_ids = [v.get("id") for v in verifications if v.get("id")]
+        base_prefix = "RMV-CUSTOM-"
+        next_num = 1
+        if existing_ids:
+            nums = []
+            for rid in existing_ids:
+                if rid.startswith(base_prefix):
+                    try:
+                        nums.append(int(rid.replace(base_prefix, "")))
+                    except ValueError:
+                        continue
+            if nums:
+                next_num = max(nums) + 1
+        generated_id = f"{base_prefix}{next_num:03d}"
+        rule.id = generated_id
+
+    # Assegurar que isAdded esteja marcado como True para novas regras
+    rule.isAdded = True
+    rule.document = "Lista de Cargas"
+
+    verifications.append(rule.model_dump())
+
+    CUSTOM_RULES_FILE.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    return EntityResult[VerificationInstruction](
+        success=True,
+        message="Verification rule added successfully",
+        model=rule,
+    )
+
+@app.put(
+    "/rules/lista_cargas/instructions/{rule_id}",
+    response_model=EntityResult[VerificationInstruction],
+)
+def update_lista_cargas_instruction(rule_id: str, updated_rule: VerificationInstruction):
+    """
+    Updates a single verification rule in rules_lista_cargas.json.
+    """
+    if not RULES_FILE.exists():
+        raise HTTPException(status_code=500, detail="rules_lista_cargas.json not found")
+
+    if updated_rule.id is not None and updated_rule.id != rule_id:
+        raise HTTPException(status_code=400, detail="Body id does not match path rule_id")
+
+    with RULES_FILE.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    verifications = data.get("verifications", [])
+
+    index_to_update = None
+    for idx, rule in enumerate(verifications):
+        if rule.get("id") == rule_id:
+            index_to_update = idx
+            break
+
+    if index_to_update is None:
+        raise HTTPException(status_code=404, detail="Rule not found")
+
+    new_rule_dict = {
+        "id": rule_id,
+        "description": updated_rule.description,
+        "instruction": updated_rule.instruction,
+        "tags": updated_rule.tags or [],
+    }
+
+    verifications[index_to_update] = new_rule_dict
+    data["verifications"] = verifications
+
+    with RULES_FILE.open("w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+    updated_model = VerificationInstruction(**new_rule_dict)
+
+    return EntityResult[VerificationInstruction](
+        success=True,
+        message="Verification rule updated successfully",
+        model=updated_model,
+    )
+
+# ==========================================
+# 7. ENDPOINTS: CHATBOT (WEBSOCKET)
+# ==========================================
+
+@app.websocket("/ws/chat")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    
+    try:
+        while True:
+            data_text = await websocket.receive_text()
+            data = json.loads(data_text)
+            
+            query = data.get("query")
+            context = data.get("context", "") 
+            
+            if not query:
+                await websocket.send_text("Erro: A pergunta é obrigatória.")
+                await websocket.send_text("[DONE]")
+                continue
+
+            for token in generate_answer_stream(query, context):
+                await websocket.send_text(token)
+            
+            await websocket.send_text("[DONE]") 
+            
+    except WebSocketDisconnect:
+        print("Cliente desconectado.")
+    except Exception as e:
+        print(f"Erro no websocket: {e}")
+        await websocket.close()
