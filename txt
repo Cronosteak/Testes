@@ -1,185 +1,452 @@
-<template>
-    <v-dialog v-model="dialog" max-width="1500" min-height="300" max-height="650">
+# app/main.py
+# ==========================================
+# 1. IMPORTS
+# ==========================================
+import json
+from pathlib import Path
+from typing import Generic, Optional, TypeVar
+from uuid import uuid4
 
-      <v-card prepend-icon="mdi-file" :title="repositorioVerificacao.id" >
-        <v-card-text style="padding-top: 15px; padding-bottom: 5px;">
-          <v-row dense>
-            <v-col cols="12" md="12" sm="12">
-                <v-textarea v-model="repositorioVerificacao.description" label="Verificação" variant="outlined" rows="3" resize></v-textarea>
-            </v-col>
+from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
 
-            <v-col cols="12" md="12" sm="12">
-                <v-textarea v-model="repositorioVerificacao.instruction" label="Instrução" variant="outlined" rows="4" no-resize></v-textarea>
-            </v-col>
+# Internal Imports
+from .logging_config import logger
+from .config import JOBS_DIR
+from .jobs import create_job, load_job
+from .pipeline import run_full_pipeline
+from .chat_service import generate_answer_stream
 
-            <!-- <v-col cols="6" md="6" sm="6">
-                <v-select v-model="repositorioVerificacao.tipoVerificacao" label="Tipo de Verificação" :items="tiposDeVerificacao" variant="outlined"></v-select>
-            </v-col> -->
+app = FastAPI(
+    title="Executive Projects Documents Verification API",
+    version="1.0.0",
+)
 
-            <v-col cols="12" md="12" sm="12" >
-                <v-select 
-                  multiple
-                  v-model="repositorioVerificacao.tags"
-                  label="Etiqueta(s)"
-                  :items="etiquetas"
-                  item-value="value"
-                  item-title="label"
-                  variant="outlined"
-                  :error="!tagsValid"
-                  :error-messages="tagsErrorMessage"                  
-                  >
-                </v-select>
-            </v-col>
-            
-            <!-- 
-            <v-col cols="12" md="12" sm="12">
-                <v-textarea :model-value="repositorioVerificacao.obs" label="Observação" variant="outlined" rows="4" no-resize></v-textarea>
-            </v-col> -->
+# ==========================================
+# 2. CONFIGURATION & CONSTANTS
+# ==========================================
+BASE_DIR = Path(__file__).resolve().parents[1]
+CONFIGS_DIR = BASE_DIR / "configs"
+RULES_FILE = CONFIGS_DIR / "rules_lista_cargas.json"
+CUSTOM_RULES_FILE = CONFIGS_DIR / "rules_lista_cargas_custom.json"
 
-          </v-row>
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # libera qualquer origem
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-        </v-card-text>
+T = TypeVar("T")
 
-        <v-divider></v-divider>
+class EntityResult(BaseModel, Generic[T]):
+    success: bool
+    message: str
+    model: Optional[T] = None
 
-        <v-card-actions>
-          <v-spacer></v-spacer>
 
-            <div class="flex justify-between w-full">
-              <div class="flex">
-                <v-btn icon="mdi-undo" size="40" class="cursor-pointer" @click="handleClickReverterRule" v-if="hasOriginalRule"></v-btn>
-              </div>
-            
-              <div class="flex justify-end">
-                <v-btn text="FECHAR" variant="plain" @click="dialog = false"></v-btn>
-                <v-btn text="SALVAR" color="primary" variant="tonal" @click="handleClickSalvarRule" :disabled="!isFormValid"></v-btn>
-              </div>
-            </div>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+class JobStatusResponse(BaseModel):
+    job_id: str
+    status: str
+    stage: str
+    message: str | None = None
+    original_filename: str
 
-    <AppDialogConfirm ref="dialogRef"/>
-</template>
 
-<script setup lang="ts">
-import { computed, inject, onMounted, ref } from 'vue'
-import  { type RepositorioVerificacao } from '../../../interfaces/repositorio-verificacao';
-import { repositorioVerificacaoService } from '../../../api/repositorioVerificacaoService';
-import { ToastSymbol } from '../../../plugins/toast';
-import AppDialogConfirm from '../../../components/ui/AppDialogConfirm.vue';
+class VerificationInstruction(BaseModel):
+    id: str | None = None
+    instruction: str | None = None
+    description: str | None = None
+    tags: list[str] | None = None
+    document: str | None = None
+    isAdded: bool | None = None
 
-const toast = inject(ToastSymbol) as any
-const dialogRef = ref()
-const originalRule = ref<RepositorioVerificacao>()
-const hasOriginalRule = ref(false);
 
-const dialog = ref(false)
-const repositorioVerificacao = ref<RepositorioVerificacao>()
-const tiposDeVerificacao = ref(['Interna'])
-const etiquetas = ref([
-  { label: 'Titulo', value: 'title' },
-  { label: 'Codigo', value: 'code' },
-  { label: 'Capa', value: 'layer' },
-  { label: 'Formato', value: 'format' },
-  { label: 'Rev', value: 'rev' },
-  { label: 'Ref. Doc', value: 'ref_doc' },
-  { label: 'Gen Notes', value: 'gen_notes' },
-  { label: 'Page Number', value: 'page_num' },
-  { label: 'Legenda', value: 'legenda' },
-  { label: 'Painel', value: 'panel' },
-  { label: 'CDC', value: 'cdc' },
-  { label: 'CCM', value: 'ccm' },
-  { label: 'CF', value: 'cf' },
-  // 'title', 'code', 'layer', 'format'
-  // 'Titulo', 'Codigo', 'Capa', 'Formato', 'Rev', 'Painel', 'CDC', 'CCM', 'Emergência', 'CF'
-])
+class VerificationRule(BaseModel):
+    id: str
+    instruction: str
+    description: str
+    tags: list[str]
+    isAdded: bool | None = None
+    document: str | None = None
 
-// Computed que valida tudo
-const isFormValid = computed(() => {
-  const descOK = repositorioVerificacao.value.description?.trim().length >= 20;
-  const instOK = repositorioVerificacao.value.instruction?.trim().length >= 20;
-  const tagsOK = tagsValid.value;
 
-  return descOK && instOK && tagsOK;
-});
+@app.post("/jobs", response_model=EntityResult[JobStatusResponse])
+async def create_job_endpoint(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+):
+    """
+    1) Create a job
+    2) Save the PDF to data/jobs/{job_id}/raw
+    3) Launch the pipeline in the background
+    """
+    logger.info("FastAPI application starting")
+    job_id = str(uuid4())
+    job = create_job(job_id, original_filename=file.filename)
 
-const tagsValid = computed(() => {
-  return Array.isArray(repositorioVerificacao.value.tags) &&
-                 repositorioVerificacao.value.tags.length >= 1 &&
-                 repositorioVerificacao.value.tags.length <= 3;
-});
+    raw_dir = JOBS_DIR / job_id / "raw"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    dest = raw_dir / "input.pdf"  
 
-const tagsErrorMessage = computed(() => {
-  return tagsValid.value
-    ? ""
-    : "Escolhe entre 1 a 3 tags.";
-});
+    content = await file.read()
+    with dest.open("wb") as f:
+        f.write(content)
 
-async function open(repo: RepositorioVerificacao) {
-  console.log(repositorioVerificacao)
-  repositorioVerificacao.value = repo;
-  const resultOriginalRule = await repositorioVerificacaoService.getOriginalRuleById(repositorioVerificacao.value.id.toString());
-  originalRule.value = resultOriginalRule.model;
+    background_tasks.add_task(run_full_pipeline, job_id)
 
-  hasOriginalRule.value = originalRule != null ? true : false;
+    return EntityResult[JobStatusResponse](
+        success=True,
+        message="Job created successfully",
+        model=JobStatusResponse(
+            job_id=job.job_id,
+            status=job.status,
+            stage=job.stage,
+            message=job.message,
+            original_filename=job.original_filename,
+        ),
+    )
 
-  dialog.value = true
-}
 
-defineExpose({ open })
-const emit = defineEmits(["updated"])
+@app.get("/jobs/{job_id}", response_model=EntityResult[JobStatusResponse])
+def get_job_status(job_id: str):
+    """
+    Get the status of a job.
+    """
+    job = load_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
 
-onMounted(async () => {
-  console.log('Componente montado')
-})
+    return EntityResult[JobStatusResponse](
+        success=True,
+        message="Job status retrieved successfully",
+        model=JobStatusResponse(
+            job_id=job.job_id,
+            status=job.status,
+            stage=job.stage,
+            message=job.message,
+            original_filename=job.original_filename,
+        ),
+    )
 
-async function handleClickSalvarRule() {  
-  atualizaVerificacao(repositorioVerificacao.value);
-}
+@app.get("/jobs/{job_id}/report")
+def download_report(job_id: str):
+    """
+    Download the final report of a job, once it is completed.
+    """
+    job = load_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
 
-async function atualizaVerificacao(objectVerificacao: RepositorioVerificacao, showToast: boolean = true) {
-  try {
-    const resultUpdateRule = await repositorioVerificacaoService.update(repositorioVerificacao.value.id.toString(), objectVerificacao)
+    if job.status != "completed":
+        raise HTTPException(status_code=409, detail="Report not ready yet")
 
-    if (!resultUpdateRule.success) {
-      toast.warning(resultUpdateRule.message ?? "Não foi possível atualizar verificação!");
+    report_path = job.report_file
+    if report_path is None or not report_path.exists():
+        raise HTTPException(status_code=404, detail="Report file not found")
+
+    suffix = report_path.suffix.lower()
+    media_type = "application/octet-stream"
+    if suffix == ".pdf":
+        media_type = "application/pdf"
+    elif suffix == ".txt":
+        media_type = "text/plain"
+    elif suffix in {".md", ".markdown"}:
+        media_type = "text/markdown"
+
+    return FileResponse(
+        path=report_path,
+        filename=report_path.name,
+        media_type=media_type,
+    )
+
+@app.get(
+    "/rules/lista_cargas/instructions",
+    response_model=EntityResult[list[VerificationInstruction]],
+)
+def get_lista_cargas_instructions():
+    """
+    Returns only the id and instruction of each verification.
+    """
+    if CUSTOM_RULES_FILE.exists():
+        try:
+            data = json.loads(CUSTOM_RULES_FILE.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            data = None
+    else:
+        data = None
+
+    if data is None:
+        if not RULES_FILE.exists():
+            raise HTTPException(status_code=500, detail="rules_lista_cargas.json not found")
+        try:
+            data = json.loads(RULES_FILE.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500, detail="rules_lista_cargas.json is invalid")
+
+    verifications = data.get("verifications", [])
+    result = [
+        VerificationInstruction(
+            id=v.get("id"),
+            instruction=v.get("instruction"),
+            description=v.get("description"),
+            tags=v.get("tags"),
+            document="Lista de Cargas",
+            isAdded=v.get("isAdded")
+        )
+        for v in verifications
+    ]
+
+    return EntityResult[list[VerificationInstruction]](
+        success=True,
+        message="Verification instructions retrieved successfully",
+        model=result,
+    )
+
+
+@app.put(
+    "/rules/lista_cargas/instructions/{rule_id}",
+    response_model=EntityResult[VerificationInstruction],
+)
+def update_lista_cargas_instruction(rule_id: str, updated_rule: VerificationInstruction):
+    """
+    Updates a single verification rule in the *custom* rules file.
+    """
+    CONFIGS_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Ensure path id and body id are consistent (if body has id)
+    if updated_rule.id is not None and updated_rule.id != rule_id:
+        raise HTTPException(status_code=400, detail="Body id does not match path rule_id")
+
+    # Load existing custom rules or start a new structure
+    if CUSTOM_RULES_FILE.exists():
+        try:
+            data = json.loads(CUSTOM_RULES_FILE.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            data = {"document_name": "Lista de Cargas (custom)", "verifications": []}
+    else:
+        # Primera vez: copiar estructura completa desde el JSON original
+        if RULES_FILE.exists():
+            try:
+                original_data = json.loads(RULES_FILE.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                original_data = {"document_name": "Lista de Cargas (original)", "verifications": []}
+        else:
+            original_data = {"document_name": "Lista de Cargas (original)", "verifications": []}
+
+        data = {
+            "document_name": "Lista de Cargas (custom)",
+            "verifications": original_data.get("verifications", []),
+        }
+
+    verifications = data.get("verifications", [])
+
+    index_to_update = None
+    for idx, rule in enumerate(verifications):
+        if rule.get("id") == rule_id:
+            index_to_update = idx
+            break
+
+    # Build complete dict to be stored back into JSON
+    new_rule_dict = {
+        "id": rule_id,
+        "description": updated_rule.description,
+        "instruction": updated_rule.instruction,
+        "tags": updated_rule.tags or [],
+        "document": "Lista de Cargas",
+        "isAdded": updated_rule.isAdded
     }
 
-    if (showToast) { toast.success(`Verificação ${objectVerificacao.id} atualizada com sucesso!`);}
-    emit("updated", objectVerificacao);
-    dialog.value = false
-  } catch (error) {
-    dialog.value = true;
-    toast.warning(`Não foi possível modificar a verificação ${objectVerificacao.id}.`)
-  }  
-}
+    if index_to_update is None:
+        # If rule does not exist yet in custom file, append it
+        verifications.append(new_rule_dict)
+    else:
+        verifications[index_to_update] = new_rule_dict
 
-async function handleClickReverterRule() {
-  try {
+    data["verifications"] = verifications
+
+    CUSTOM_RULES_FILE.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    updated_model = VerificationInstruction(**new_rule_dict)
+
+    return EntityResult[VerificationInstruction](
+        success=True,
+        message="Verification rule updated successfully",
+        model=updated_model,
+    )
+
+@app.delete("/verifications/{rule_id}", response_model=EntityResult[bool])
+def delete_verification(rule_id: str):
+    """Delete a custom verification rule only if it was added (isAdded == True)."""
+
+    if not CUSTOM_RULES_FILE.exists():
+        raise HTTPException(status_code=404, detail="Custom rules file not found")
+
+    try:
+        data = json.loads(CUSTOM_RULES_FILE.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Custom rules file is invalid")
+
+    verifications = data.get("verifications", [])
+    new_verifications: list[dict] = []
+    deleted = False
+
+    for rule in verifications:
+        if rule.get("id") == rule_id:
+            # Só permite excluir se isAdded == True
+            if rule.get("isAdded") is True:
+                deleted = True
+                continue
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Only rules with isAdded == True can be deleted",
+                )
+        new_verifications.append(rule)
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Rule not found or not deletable")
+
+    data["verifications"] = new_verifications
+    CUSTOM_RULES_FILE.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    return EntityResult[bool](
+        success=True,
+        message="Verification rule deleted successfully",
+        model=True,
+    )
+
+@app.post("/verifications", response_model=EntityResult[VerificationRule])
+def add_verification(rule: VerificationRule):
+    """
+    Add a new verification rule to the custom JSON file.
+    The original `rules_lista_cargas.json` file is never modified.
+    """
+
+    CONFIGS_DIR.mkdir(parents=True, exist_ok=True)
+
+    if CUSTOM_RULES_FILE.exists():
+        try:
+            data = json.loads(CUSTOM_RULES_FILE.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            data = {"document_name": "Lista de Cargas (custom)", "verifications": []}
+    else:
+        if RULES_FILE.exists():
+            try:
+                original_data = json.loads(RULES_FILE.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                original_data = {"document_name": "Lista de Cargas (original)", "verifications": []}
+        else:
+            original_data = {"document_name": "Lista de Cargas (original)", "verifications": []}
+
+        data = {
+            "document_name": "Lista de Cargas (custom)",
+            "verifications": original_data.get("verifications", []),
+        }
+
+    verifications = data.setdefault("verifications", [])
+
+    # Gerar ID se não vier do frontend
+    if not rule.id:
+        # geramos um ID simples incremental baseado nos existentes no custom.
+        existing_ids = [v.get("id") for v in verifications if v.get("id")]
+        base_prefix = "RMV-CUSTOM-"
+        next_num = 1
+        if existing_ids:
+            nums = []
+            for rid in existing_ids:
+                if rid.startswith(base_prefix):
+                    try:
+                        nums.append(int(rid.replace(base_prefix, "")))
+                    except ValueError:
+                        continue
+            if nums:
+                next_num = max(nums) + 1
+        generated_id = f"{base_prefix}{next_num:03d}"
+        rule.id = generated_id
+
+    # Assegurar que isAdded esteja marcado como True para novas regras
+    rule.isAdded = True
+    rule.document = "Lista de Cargas"
+
+    verifications.append(rule.model_dump())
+
+    CUSTOM_RULES_FILE.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    return EntityResult[VerificationRule](
+        success=True,
+        message="Verification rule added successfully",
+        model=rule,
+    )
+
+
+@app.get("/verifications/original/{rule_id}", response_model=EntityResult[VerificationInstruction])
+def get_rule_original_by_id(rule_id: str):
+    """Get a verification rule by id from the original rules JSON only."""
+
+    if not RULES_FILE.exists():
+        raise HTTPException(status_code=500, detail="rules_lista_cargas.json not found")
+
+    try:
+        data = json.loads(RULES_FILE.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="rules_lista_cargas.json is invalid")
+
+    for rule_data in data.get("verifications", []):
+        if rule_data.get("id") == rule_id:
+            rule = VerificationInstruction(**rule_data)
+            rule.document = "Lista de Cargas"
+            return EntityResult[VerificationInstruction](
+                success=True,
+                message="Original verification rule found",
+                model=rule,
+            )
+
+    return EntityResult[VerificationInstruction](
+        success=False,
+        message="Original verification rule was not found",
+        model=None,
+    )
+
+    raise HTTPException(status_code=404, detail="Verification rule not found in original file")
+
+# ==========================================
+# 7. ENDPOINTS: CHATBOT (WEBSOCKET)
+# ==========================================
+
+@app.websocket("/ws/chat")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
     
-    const dialogResult = await dialogRef.value.open('Reverter verificação para original', 'Tem certeza que deseja continuar?', 2);
+    try:
+        while True:
+            data_text = await websocket.receive_text()
+            data = json.loads(data_text)
+            
+            query = data.get("query")
+            context = data.get("context", "") 
+            
+            if not query:
+                await websocket.send_text("Erro: A pergunta é obrigatória.")
+                await websocket.send_text("[DONE]")
+                continue
 
-    if (dialogResult) {
-      atualizaVerificacao(originalRule.value, false)
-      toast.success(`Verificação ${originalRule.value.id} revertida com sucesso!`);
-      emit("updated", originalRule.value);
-      dialog.value = false;
-    }
-
-  } catch (error) {
-    toast.warning("Não foi possível reverter verificação.");
-    dialog.value = true;
-  }
-}
-
-</script>
-
-<style>
-
-.v-card-item {
-    background-color: var(--primary-brand);
-    color: white;
-}
-
-</style>
+            for token in generate_answer_stream(query, context):
+                await websocket.send_text(token)
+            
+            await websocket.send_text("[DONE]") 
+            
+    except WebSocketDisconnect:
+        print("Cliente desconectado.")
+    except Exception as e:
+        print(f"Erro no websocket: {e}")
+        await websocket.close()    
