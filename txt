@@ -1,4 +1,5 @@
 # app/main.py
+
 # ==========================================
 # 1. IMPORTS
 # ==========================================
@@ -19,11 +20,6 @@ from .jobs import create_job, load_job
 from .pipeline import run_full_pipeline
 from .chat_service import generate_answer_stream
 
-app = FastAPI(
-    title="Executive Projects Documents Verification API",
-    version="1.0.0",
-)
-
 # ==========================================
 # 2. CONFIGURATION & CONSTANTS
 # ==========================================
@@ -32,47 +28,55 @@ CONFIGS_DIR = BASE_DIR / "configs"
 RULES_FILE = CONFIGS_DIR / "rules_lista_cargas.json"
 CUSTOM_RULES_FILE = CONFIGS_DIR / "rules_lista_cargas_custom.json"
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],   # libera qualquer origem
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
+# ==========================================
+# 3. PYDANTIC MODELS (SCHEMAS)
+# ==========================================
 T = TypeVar("T")
 
 class EntityResult(BaseModel, Generic[T]):
+    """Generic wrapper for API responses"""
     success: bool
     message: str
     model: Optional[T] = None
 
-
 class JobStatusResponse(BaseModel):
+    """Schema for Job Status"""
     job_id: str
     status: str
     stage: str
     message: str | None = None
     original_filename: str
 
-
 class VerificationInstruction(BaseModel):
+    """Schema for Rule Instructions (used mainly by frontend)."""
+
     id: str | None = None
     instruction: str | None = None
     description: str | None = None
+    source_document: str | None = None
     tags: list[str] | None = None
-    document: str | None = None
     isAdded: bool | None = None
 
+# ==========================================
+# 4. APP INITIALIZATION & MIDDLEWARE
+# ==========================================
+app = FastAPI(
+    title="Executive Projects Documents Verification API",
+    version="1.0.0",
+)
 
-class VerificationRule(BaseModel):
-    id: str
-    instruction: str
-    description: str
-    tags: list[str]
-    isAdded: bool | None = None
-    document: str | None = None
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # libera qualquer origem
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
+)
 
+# ==========================================
+# 5. ENDPOINTS: JOB MANAGEMENT
+# ==========================================
 
 @app.post("/jobs", response_model=EntityResult[JobStatusResponse])
 async def create_job_endpoint(
@@ -109,7 +113,6 @@ async def create_job_endpoint(
             original_filename=job.original_filename,
         ),
     )
-
 
 @app.get("/jobs/{job_id}", response_model=EntityResult[JobStatusResponse])
 def get_job_status(job_id: str):
@@ -157,11 +160,21 @@ def download_report(job_id: str):
     elif suffix in {".md", ".markdown"}:
         media_type = "text/markdown"
 
+    # Informação enviada para o front indicando qual extensão ele deve baixar.
+    headers = {
+        "Content-Disposition": f"attachment; filename={report_path.name}"
+    }
+
     return FileResponse(
         path=report_path,
         filename=report_path.name,
         media_type=media_type,
+        headers=headers
     )
+
+# ==========================================
+# 6. ENDPOINTS: RULES CONFIGURATION
+# ==========================================
 
 @app.get(
     "/rules/lista_cargas/instructions",
@@ -171,6 +184,7 @@ def get_lista_cargas_instructions():
     """
     Returns only the id and instruction of each verification.
     """
+    # Preferir arquivo custom se existir; caso contrário, usar o original
     if CUSTOM_RULES_FILE.exists():
         try:
             data = json.loads(CUSTOM_RULES_FILE.read_text(encoding="utf-8"))
@@ -194,8 +208,8 @@ def get_lista_cargas_instructions():
             instruction=v.get("instruction"),
             description=v.get("description"),
             tags=v.get("tags"),
-            document="Lista de Cargas",
-            isAdded=v.get("isAdded")
+            source_document= v.get("source_document"),
+            isAdded=v.get("isAdded"),
         )
         for v in verifications
     ]
@@ -205,7 +219,6 @@ def get_lista_cargas_instructions():
         message="Verification instructions retrieved successfully",
         model=result,
     )
-
 
 @app.put(
     "/rules/lista_cargas/instructions/{rule_id}",
@@ -220,7 +233,6 @@ def update_lista_cargas_instruction(rule_id: str, updated_rule: VerificationInst
     # Ensure path id and body id are consistent (if body has id)
     if updated_rule.id is not None and updated_rule.id != rule_id:
         raise HTTPException(status_code=400, detail="Body id does not match path rule_id")
-
     # Load existing custom rules or start a new structure
     if CUSTOM_RULES_FILE.exists():
         try:
@@ -228,7 +240,7 @@ def update_lista_cargas_instruction(rule_id: str, updated_rule: VerificationInst
         except json.JSONDecodeError:
             data = {"document_name": "Lista de Cargas (custom)", "verifications": []}
     else:
-        # Primera vez: copiar estructura completa desde el JSON original
+        # Primera vez: copiar estrutura completa desde o JSON original
         if RULES_FILE.exists():
             try:
                 original_data = json.loads(RULES_FILE.read_text(encoding="utf-8"))
@@ -250,18 +262,16 @@ def update_lista_cargas_instruction(rule_id: str, updated_rule: VerificationInst
             index_to_update = idx
             break
 
-    # Build complete dict to be stored back into JSON
     new_rule_dict = {
         "id": rule_id,
         "description": updated_rule.description,
         "instruction": updated_rule.instruction,
         "tags": updated_rule.tags or [],
-        "document": "Lista de Cargas",
-        "isAdded": updated_rule.isAdded
+        "source_document": updated_rule.source_document,
+        "isAdded": updated_rule.isAdded,
     }
 
     if index_to_update is None:
-        # If rule does not exist yet in custom file, append it
         verifications.append(new_rule_dict)
     else:
         verifications[index_to_update] = new_rule_dict
@@ -279,6 +289,7 @@ def update_lista_cargas_instruction(rule_id: str, updated_rule: VerificationInst
         message="Verification rule updated successfully",
         model=updated_model,
     )
+
 
 @app.delete("/verifications/{rule_id}", response_model=EntityResult[bool])
 def delete_verification(rule_id: str):
@@ -298,7 +309,6 @@ def delete_verification(rule_id: str):
 
     for rule in verifications:
         if rule.get("id") == rule_id:
-            # Só permite excluir se isAdded == True
             if rule.get("isAdded") is True:
                 deleted = True
                 continue
@@ -323,10 +333,11 @@ def delete_verification(rule_id: str):
         model=True,
     )
 
-@app.post("/verifications", response_model=EntityResult[VerificationRule])
-def add_verification(rule: VerificationRule):
-    """
-    Add a new verification rule to the custom JSON file.
+
+@app.post("/verifications", response_model=EntityResult[VerificationInstruction])
+def add_verification(rule: VerificationInstruction):
+    """Add a new verification rule to the custom JSON file.
+
     The original `rules_lista_cargas.json` file is never modified.
     """
 
@@ -355,12 +366,11 @@ def add_verification(rule: VerificationRule):
 
     # Gerar ID se não vier do frontend
     if not rule.id:
-        # geramos um ID simples incremental baseado nos existentes no custom.
         existing_ids = [v.get("id") for v in verifications if v.get("id")]
         base_prefix = "RMV-CUSTOM-"
         next_num = 1
         if existing_ids:
-            nums = []
+            nums: list[int] = []
             for rid in existing_ids:
                 if rid.startswith(base_prefix):
                     try:
@@ -372,9 +382,8 @@ def add_verification(rule: VerificationRule):
         generated_id = f"{base_prefix}{next_num:03d}"
         rule.id = generated_id
 
-    # Assegurar que isAdded esteja marcado como True para novas regras
     rule.isAdded = True
-    rule.document = "Lista de Cargas"
+    rule.source_document = "Lista de Verificação";
 
     verifications.append(rule.model_dump())
 
@@ -382,7 +391,7 @@ def add_verification(rule: VerificationRule):
         json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
-    return EntityResult[VerificationRule](
+    return EntityResult[VerificationInstruction](
         success=True,
         message="Verification rule added successfully",
         model=rule,
@@ -404,7 +413,6 @@ def get_rule_original_by_id(rule_id: str):
     for rule_data in data.get("verifications", []):
         if rule_data.get("id") == rule_id:
             rule = VerificationInstruction(**rule_data)
-            rule.document = "Lista de Cargas"
             return EntityResult[VerificationInstruction](
                 success=True,
                 message="Original verification rule found",
@@ -416,8 +424,6 @@ def get_rule_original_by_id(rule_id: str):
         message="Original verification rule was not found",
         model=None,
     )
-
-    raise HTTPException(status_code=404, detail="Verification rule not found in original file")
 
 # ==========================================
 # 7. ENDPOINTS: CHATBOT (WEBSOCKET)
@@ -449,4 +455,4 @@ async def websocket_endpoint(websocket: WebSocket):
         print("Cliente desconectado.")
     except Exception as e:
         print(f"Erro no websocket: {e}")
-        await websocket.close()    
+        await websocket.close()
