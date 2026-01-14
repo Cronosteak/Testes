@@ -1,458 +1,125 @@
-# app/main.py
+import os
+import sys
+from openai import AzureOpenAI
+from dotenv import load_dotenv
+import asyncio
+from typing import Generator
 
-# ==========================================
-# 1. IMPORTS
-# ==========================================
-import json
-from pathlib import Path
-from typing import Generic, Optional, TypeVar
-from uuid import uuid4
+# Asegurar que encuentra los utils
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from utils import base_utils as bu
+from utils import retrieval_utils as ru
+from app.config import PROJECT_ROOT, DATA_DIR, CONFIGS_DIR
 
-# Internal Imports
-from .logging_config import logger
-from .config import JOBS_DIR
-from .jobs import create_job, load_job
-from .pipeline import run_full_pipeline
-from .chat_service import generate_answer_stream
+load_dotenv()
 
-# ==========================================
-# 2. CONFIGURATION & CONSTANTS
-# ==========================================
-BASE_DIR = Path(__file__).resolve().parents[1]
-CONFIGS_DIR = BASE_DIR / "configs"
-RULES_FILE = CONFIGS_DIR / "rules_lista_cargas.json"
-CUSTOM_RULES_FILE = CONFIGS_DIR / "rules_lista_cargas_custom.json"
+_AZURE_CLIENT = None
+_RAG_COMPONENTS = None
 
-# ==========================================
-# 3. PYDANTIC MODELS (SCHEMAS)
-# ==========================================
-T = TypeVar("T")
-
-class EntityResult(BaseModel, Generic[T]):
-    """Generic wrapper for API responses"""
-    success: bool
-    message: str
-    model: Optional[T] = None
-
-class JobStatusResponse(BaseModel):
-    """Schema for Job Status"""
-    job_id: str
-    status: str
-    stage: str
-    message: str | None = None
-    original_filename: str
-
-class VerificationInstruction(BaseModel):
-    """Schema for Rule Instructions (used mainly by frontend)."""
-
-    id: str | None = None
-    instruction: str | None = None
-    description: str | None = None
-    source_document: str | None = None
-    tags: list[str] | None = None
-    isAdded: bool | None = None
-
-# ==========================================
-# 4. APP INITIALIZATION & MIDDLEWARE
-# ==========================================
-app = FastAPI(
-    title="Executive Projects Documents Verification API",
-    version="1.0.0",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],   # libera qualquer origem
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["Content-Disposition"],
-)
-
-# ==========================================
-# 5. ENDPOINTS: JOB MANAGEMENT
-# ==========================================
-
-@app.post("/jobs", response_model=EntityResult[JobStatusResponse])
-async def create_job_endpoint(
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(...),
-):
-    """
-    1) Create a job
-    2) Save the PDF to data/jobs/{job_id}/raw
-    3) Launch the pipeline in the background
-    """
-    logger.info("FastAPI application starting")
-    job_id = str(uuid4())
-    job = create_job(job_id, original_filename=file.filename)
-
-    raw_dir = JOBS_DIR / job_id / "raw"
-    raw_dir.mkdir(parents=True, exist_ok=True)
-    dest = raw_dir / "input.pdf"  
-
-    content = await file.read()
-    with dest.open("wb") as f:
-        f.write(content)
-
-    background_tasks.add_task(run_full_pipeline, job_id)
-
-    return EntityResult[JobStatusResponse](
-        success=True,
-        message="Job created successfully",
-        model=JobStatusResponse(
-            job_id=job.job_id,
-            status=job.status,
-            stage=job.stage,
-            message=job.message,
-            original_filename=job.original_filename,
-        ),
-    )
-
-@app.get("/jobs/{job_id}", response_model=EntityResult[JobStatusResponse])
-def get_job_status(job_id: str):
-    """
-    Get the status of a job.
-    """
-    job = load_job(job_id)
-    if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
-
-    return EntityResult[JobStatusResponse](
-        success=True,
-        message="Job status retrieved successfully",
-        model=JobStatusResponse(
-            job_id=job.job_id,
-            status=job.status,
-            stage=job.stage,
-            message=job.message,
-            original_filename=job.original_filename,
-        ),
-    )
-
-@app.get("/jobs/{job_id}/report")
-def download_report(job_id: str):
-    """
-    Download the final report of a job, once it is completed.
-    """
-    job = load_job(job_id)
-    if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
-
-    if job.status != "completed":
-        raise HTTPException(status_code=409, detail="Report not ready yet")
-
-    report_path = job.report_file
-    if report_path is None or not report_path.exists():
-        raise HTTPException(status_code=404, detail="Report file not found")
-
-    suffix = report_path.suffix.lower()
-    media_type = "application/octet-stream"
-    if suffix == ".pdf":
-        media_type = "application/pdf"
-    elif suffix == ".txt":
-        media_type = "text/plain"
-    elif suffix in {".md", ".markdown"}:
-        media_type = "text/markdown"
-
-    # Informação enviada para o front indicando qual extensão ele deve baixar.
-    headers = {
-        "Content-Disposition": f"attachment; filename={report_path.name}"
-    }
-
-    return FileResponse(
-        path=report_path,
-        filename=report_path.name,
-        media_type=media_type,
-        headers=headers
-    )
-
-# ==========================================
-# 6. ENDPOINTS: RULES CONFIGURATION
-# ==========================================
-
-@app.get(
-    "/rules/lista_cargas/instructions",
-    response_model=EntityResult[list[VerificationInstruction]],
-)
-def get_lista_cargas_instructions():
-    """
-    Returns only the id and instruction of each verification.
-    """
-    # Preferir arquivo custom se existir; caso contrário, usar o original
-    if CUSTOM_RULES_FILE.exists():
-        try:
-            data = json.loads(CUSTOM_RULES_FILE.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            data = None
-    else:
-        data = None
-
-    if data is None:
-        if not RULES_FILE.exists():
-            raise HTTPException(status_code=500, detail="rules_lista_cargas.json not found")
-        try:
-            data = json.loads(RULES_FILE.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=500, detail="rules_lista_cargas.json is invalid")
-
-    verifications = data.get("verifications", [])
-    result = [
-        VerificationInstruction(
-            id=v.get("id"),
-            instruction=v.get("instruction"),
-            description=v.get("description"),
-            tags=v.get("tags"),
-            source_document= v.get("source_document"),
-            isAdded=v.get("isAdded"),
+def get_azure_client():
+    global _AZURE_CLIENT
+    if _AZURE_CLIENT is None:
+        _AZURE_CLIENT = AzureOpenAI(
+            api_key=os.getenv("AZURE_API_KEY"),
+            api_version=os.getenv("AZURE_API_VERSION"),
+            azure_endpoint=os.getenv("AZURE_ENDPOINT")
         )
-        for v in verifications
-    ]
+    return _AZURE_CLIENT
 
-    return EntityResult[list[VerificationInstruction]](
-        success=True,
-        message="Verification instructions retrieved successfully",
-        model=result,
-    )
-
-@app.put(
-    "/rules/lista_cargas/instructions/{rule_id}",
-    response_model=EntityResult[VerificationInstruction],
-)
-def update_lista_cargas_instruction(rule_id: str, updated_rule: VerificationInstruction):
-    """
-    Updates a single verification rule in the *custom* rules file.
-    """
-    CONFIGS_DIR.mkdir(parents=True, exist_ok=True)
-
-    # Ensure path id and body id are consistent (if body has id)
-    if updated_rule.id is not None and updated_rule.id != rule_id:
-        raise HTTPException(status_code=400, detail="Body id does not match path rule_id")
-    # Load existing custom rules or start a new structure
-    if CUSTOM_RULES_FILE.exists():
-        try:
-            data = json.loads(CUSTOM_RULES_FILE.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            data = {"document_name": "Lista de Cargas (custom)", "verifications": []}
-    else:
-        # Primera vez: copiar estrutura completa desde o JSON original
-        if RULES_FILE.exists():
-            try:
-                original_data = json.loads(RULES_FILE.read_text(encoding="utf-8"))
-            except json.JSONDecodeError:
-                original_data = {"document_name": "Lista de Cargas (original)", "verifications": []}
-        else:
-            original_data = {"document_name": "Lista de Cargas (original)", "verifications": []}
-
-        data = {
-            "document_name": "Lista de Cargas (custom)",
-            "verifications": original_data.get("verifications", []),
-        }
-
-    verifications = data.get("verifications", [])
-
-    index_to_update = None
-    for idx, rule in enumerate(verifications):
-        if rule.get("id") == rule_id:
-            index_to_update = idx
-            break
-
-    new_rule_dict = {
-        "id": rule_id,
-        "description": updated_rule.description,
-        "instruction": updated_rule.instruction,
-        "tags": updated_rule.tags or [],
-        "source_document": updated_rule.source_document,
-        "isAdded": updated_rule.isAdded,
-    }
-
-    if index_to_update is None:
-        verifications.append(new_rule_dict)
-    else:
-        verifications[index_to_update] = new_rule_dict
-
-    data["verifications"] = verifications
-
-    CUSTOM_RULES_FILE.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
-    updated_model = VerificationInstruction(**new_rule_dict)
-
-    return EntityResult[VerificationInstruction](
-        success=True,
-        message="Verification rule updated successfully",
-        model=updated_model,
-    )
-
-
-@app.delete("/verifications/{rule_id}", response_model=EntityResult[bool])
-def delete_verification(rule_id: str):
-    """Delete a custom verification rule only if it was added (isAdded == True)."""
-
-    if not CUSTOM_RULES_FILE.exists():
-        raise HTTPException(status_code=404, detail="Custom rules file not found")
-
-    try:
-        data = json.loads(CUSTOM_RULES_FILE.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Custom rules file is invalid")
-
-    verifications = data.get("verifications", [])
-    new_verifications: list[dict] = []
-    deleted = False
-
-    for rule in verifications:
-        if rule.get("id") == rule_id:
-            if rule.get("isAdded") is True:
-                deleted = True
-                continue
-            else:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Only rules with isAdded == True can be deleted",
-                )
-        new_verifications.append(rule)
-
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Rule not found or not deletable")
-
-    data["verifications"] = new_verifications
-    CUSTOM_RULES_FILE.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
-    return EntityResult[bool](
-        success=True,
-        message="Verification rule deleted successfully",
-        model=True,
-    )
-
-
-@app.post("/verifications", response_model=EntityResult[VerificationInstruction])
-def add_verification(rule: VerificationInstruction):
-    """Add a new verification rule to the custom JSON file.
-
-    The original `rules_lista_cargas.json` file is never modified.
-    """
-
-    CONFIGS_DIR.mkdir(parents=True, exist_ok=True)
-
-    if CUSTOM_RULES_FILE.exists():
-        try:
-            data = json.loads(CUSTOM_RULES_FILE.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            data = {"document_name": "Lista de Cargas (custom)", "verifications": []}
-    else:
-        if RULES_FILE.exists():
-            try:
-                original_data = json.loads(RULES_FILE.read_text(encoding="utf-8"))
-            except json.JSONDecodeError:
-                original_data = {"document_name": "Lista de Cargas (original)", "verifications": []}
-        else:
-            original_data = {"document_name": "Lista de Cargas (original)", "verifications": []}
-
-        data = {
-            "document_name": "Lista de Cargas (custom)",
-            "verifications": original_data.get("verifications", []),
-        }
-
-    verifications = data.setdefault("verifications", [])
-
-    # Gerar ID se não vier do frontend
-    if not rule.id:
-        existing_ids = [v.get("id") for v in verifications if v.get("id")]
-        base_prefix = "RMV-CUSTOM-"
-        next_num = 1
-        if existing_ids:
-            nums: list[int] = []
-            for rid in existing_ids:
-                if rid.startswith(base_prefix):
-                    try:
-                        nums.append(int(rid.replace(base_prefix, "")))
-                    except ValueError:
-                        continue
-            if nums:
-                next_num = max(nums) + 1
-        generated_id = f"{base_prefix}{next_num:03d}"
-        rule.id = generated_id
-
-    rule.isAdded = True
-    rule.source_document = "Lista de Verificação";
-
-    verifications.append(rule.model_dump())
-
-    CUSTOM_RULES_FILE.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
-    return EntityResult[VerificationInstruction](
-        success=True,
-        message="Verification rule added successfully",
-        model=rule,
-    )
-
-
-@app.get("/verifications/original/{rule_id}", response_model=EntityResult[VerificationInstruction])
-def get_rule_original_by_id(rule_id: str):
-    """Get a verification rule by id from the original rules JSON only."""
-
-    if not RULES_FILE.exists():
-        raise HTTPException(status_code=500, detail="rules_lista_cargas.json not found")
-
-    try:
-        data = json.loads(RULES_FILE.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="rules_lista_cargas.json is invalid")
-
-    for rule_data in data.get("verifications", []):
-        if rule_data.get("id") == rule_id:
-            rule = VerificationInstruction(**rule_data)
-            return EntityResult[VerificationInstruction](
-                success=True,
-                message="Original verification rule found",
-                model=rule,
-            )
-
-    return EntityResult[VerificationInstruction](
-        success=False,
-        message="Original verification rule was not found",
-        model=None,
-    )
-
-# ==========================================
-# 7. ENDPOINTS: CHATBOT (WEBSOCKET)
-# ==========================================
-
-@app.websocket("/ws/chat")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
+def get_rag_components():
+    global _RAG_COMPONENTS
     
-    try:
-        while True:
-            data_text = await websocket.receive_text()
-            data = json.loads(data_text)
-            
-            query = data.get("query")
-            context = data.get("context", "") 
-            
-            if not query:
-                await websocket.send_text("Erro: A pergunta é obrigatória.")
-                await websocket.send_text("[DONE]")
-                continue
+    if _RAG_COMPONENTS is None:
+        print("🔄 [System] Loading RAG system...")
+        
+        config_path = CONFIGS_DIR / "config.json"
+        config = bu.load_config(str(config_path))
 
-            for token in generate_answer_stream(query, context):
-                await websocket.send_text(token)
-            
-            await websocket.send_text("[DONE]") 
-            
-    except WebSocketDisconnect:
-        print("Cliente desconectado.")
+        embeddings_dir = DATA_DIR / "embeddings"
+        
+        print(f"Loading embeddings from: {embeddings_dir}")
+        embeddings_data = ru.load_embeddings(str(embeddings_dir))
+        
+        if not embeddings_data:
+            print(f"WARNING: No embeddings found in {embeddings_dir}")
+            return None
+
+        model_name = config["embeddings"]["model_name"]
+        retrieval_model = ru.load_model(model_name)
+
+        _RAG_COMPONENTS = {
+            "config": config,
+            "embeddings": embeddings_data["embeddings"],
+            "contents": embeddings_data["segment_contents"],
+            "sources": embeddings_data.get("segment_sources", []),
+            "retrieval_model": retrieval_model
+        }
+        print("✅ [System] RAG system loaded.")
+        
+    return _RAG_COMPONENTS
+
+def generate_answer_stream(query: str, manual_context: str = None, temperature: float = 0):
+    client = get_azure_client()
+    rag = get_rag_components() 
+
+    final_context = manual_context or ""
+
+    if rag:
+        top_k = rag["config"]["retrieve"]["top_k"]
+        top_segments, top_similarities, top_sources = ru.search_query(
+            query=query,
+            corpus_embeddings=rag["embeddings"],
+            retrieval_model=rag["retrieval_model"],
+            segment_contents=rag["contents"],
+            segment_sources=rag["sources"],
+            top_k=top_k
+        )
+
+        context_list = []
+        for txt, src in zip(top_segments, top_sources):
+            context_list.append(f"Fonte: {src}\nConteúdo: {txt}")
+        
+        retrieved_context_str = "\n\n---\n\n".join(context_list)
+        
+        if final_context:
+            final_context += f"\n\nInformação Recuperada:\n{retrieved_context_str}"
+        else:
+            final_context = retrieved_context_str
+    else:
+        if not final_context:
+            final_context = "No context available (RAG not loaded)."
+
+    deployment_name = os.getenv("AZURE_DEPLOYMENT_NAME", "gpt-4")
+    
+    system_prompt = (
+        "Você é o Assistente Virtual do Projeto PROSEI-IA (Módulo Fiscalização).\n"
+        "Baseie-se EXCLUSIVAMENTE no Contexto fornecido.\n"
+        "Mantenha tom técnico e profissional em Português."
+    )
+
+    user_prompt = f"Contexto:\n{final_context}\n\nPergunta:\n{query}\n"
+
+    try:
+        response = client.chat.completions.create(
+            model=deployment_name, 
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=temperature,
+            stream=True
+        )
+
+        for chunk in response:
+            if chunk.choices and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
+
     except Exception as e:
-        print(f"Erro no websocket: {e}")
-        await websocket.close()
+        yield f"Azure Error: {str(e)}"
+
+async def stream_generator(generator: Generator[str, None, None]):
+    loop = asyncio.get_running_loop()
+    for token in generator:
+        yield token
+        await asyncio.sleep(0)
