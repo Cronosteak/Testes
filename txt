@@ -1,32 +1,40 @@
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'vpc-opensearch-domain-dev-hvtvognzh37xcfie5k7rc5benu.sa-east-1.es.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+OS: 200 {
+  "name" : "a5ad1418cafcb39171f312e34f0efcc2",
+  "cluster_name" : "939327882667:opensearch-domain-dev",
+  "cluster_uuid" : "bbO5yTUeRGuqipMbphTg-g",
+  "version" : {
+    "distribution" : "opensearch"
+
 ---------------------------------------------------------------------------
 TimeoutError                              Traceback (most recent call last)
-File /nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:534, in HTTPConnectionPool._make_request(self, conn, method, url, body, headers, retries, timeout, chunked, response_conn, preload_content, decode_content, enforce_content_length)
-    533 try:
---> 534     response = conn.getresponse()
-    535 except (BaseSSLError, OSError) as e:
+File /nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connection.py:204, in HTTPConnection._new_conn(self)
+    203 try:
+--> 204     sock = connection.create_connection(
+    205         (self._dns_host, self.port),
+    206         self.timeout,
+    207         source_address=self.source_address,
+    208         socket_options=self.socket_options,
+    209     )
+    210 except socket.gaierror as e:
 
-File /nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connection.py:571, in HTTPConnection.getresponse(self)
-    570 # Get the response from http.client.HTTPConnection
---> 571 httplib_response = super().getresponse()
-    573 try:
+File /nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/util/connection.py:85, in create_connection(address, timeout, source_address, socket_options)
+     84 try:
+---> 85     raise err
+     86 finally:
+     87     # Break explicitly a reference cycle
 
-File /usr/lib/python3.10/http/client.py:1395, in HTTPConnection.getresponse(self)
-   1394 try:
--> 1395     response.begin()
-   1396 except ConnectionError:
+File /nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/util/connection.py:73, in create_connection(address, timeout, source_address, socket_options)
+     72     sock.bind(source_address)
+---> 73 sock.connect(sa)
+     74 # Break explicitly a reference cycle
 
-File /usr/lib/python3.10/http/client.py:323, in HTTPResponse.begin(self)
-    322 while True:
---> 323     version, status, reason = self._read_status()
-    324     if status != CONTINUE:
-
-File /usr/lib/python3.10/http/client.py:284, in HTTPResponse._read_status(self)
-    283 def _read_status(self):
---> 284     line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+TimeoutError: timed out
 ...
---> 690     raise ReadTimeout(e, request=request)
-    691 elif isinstance(e, _InvalidHeader):
-    692     raise InvalidHeader(e, request=request)
+--> 665         raise ConnectTimeout(e, request=request)
+    667 if isinstance(e.reason, ResponseError):
+    668     raise RetryError(e, request=request)
 
-ReadTimeout: HTTPConnectionPool(host='inet-sys.petrobras.com.br', port=804): Read timed out. (read timeout=10)
+ConnectTimeout: HTTPConnectionPool(host='souelvis.ddns.net', port=59200): Max retries exceeded with url: / (Caused by ConnectTimeoutError(<HTTPConnection(host='souelvis.ddns.net', port=59200) at 0x1497841f6fe0>, 'Connection to souelvis.ddns.net timed out. (connect timeout=10)'))
 Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
