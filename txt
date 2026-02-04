@@ -1,4 +1,27 @@
-ERROR:pipeline_worker:Pipeline failed for c69f9ba1-9365-494e-b86c-d01d4296c545
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3776015]
+INFO:numexpr.utils:Note: NumExpr detected 52 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+INFO:numexpr.utils:NumExpr defaulting to 16 threads.
+INFO:     Started server process [3780053]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:api_fisc_internal:Received pipeline trigger for job: 4c7a21e5-585f-495b-98a8-d86530e2ab41
+INFO:     10.30.121.55:53556 - "POST /pipeline/run HTTP/1.1" 200 OK
+INFO:pipeline_worker:Starting pipeline for Job ID: 4c7a21e5-585f-495b-98a8-d86530e2ab41
+INFO:pipeline_worker:[pipeline] Running script: convert_documents.py
+ERROR:pipeline_worker:[pipeline] Script convert_documents.py FAILED code 1
+ERROR:pipeline_worker:[convert_documents.py] stderr:
+Traceback (most recent call last):
+  File "/nethome/prosei_d/Prosei/prosei-api-fiscalizacion/scripts/convert_documents.py", line 27, in <module>
+    from src.conversion import (
+  File "/nethome/prosei_d/Prosei/prosei-api-fiscalizacion/src/conversion/__init__.py", line 8, in <module>
+    from .converters import (
+ImportError: cannot import name 'PyMuPDF4LLMExporter' from 'src.conversion.converters' (/nethome/prosei_d/Prosei/prosei-api-fiscalizacion/src/conversion/converters.py)
+
+ERROR:pipeline_worker:Pipeline failed for 4c7a21e5-585f-495b-98a8-d86530e2ab41
 Traceback (most recent call last):
   File "/nethome/prosei_d/Prosei/prosei-api-fiscalizacion/app/pipeline.py", line 78, in run_full_pipeline
     run_script("convert_documents.py", raw_dir, processed_dir)
@@ -6,4 +29,4 @@ Traceback (most recent call last):
     result = subprocess.run(
   File "/usr/lib/python3.10/subprocess.py", line 526, in run
     raise CalledProcessError(retcode, process.args,
-subprocess.CalledProcessError: Command '['/nethome/prosei_d/Prosei/prosei-api-fiscalizacion/venv/bin/python', '/nethome/prosei_d/Prosei/prosei-api-fiscalizacion/scripts/convert_documents.py', '--input', '/nethome/prosei_d/Prosei/shared_data/jobs/c69f9ba1-9365-494e-b86c-d01d4296c545/raw', '--output', '/nethome/prosei_d/Prosei/shared_data/jobs/c69f9ba1-9365-494e-b86c-d01d4296c545/processed']' returned non-zero exit status 1.
+subprocess.CalledProcessError: Command '['/nethome/prosei_d/Prosei/prosei-api-fiscalizacion/venv/bin/python', '/nethome/prosei_d/Prosei/prosei-api-fiscalizacion/scripts/convert_documents.py', '--input', '/nethome/prosei_d/Prosei/shared_data/jobs/4c7a21e5-585f-495b-98a8-d86530e2ab41/raw', '--output', '/nethome/prosei_d/Prosei/shared_data/jobs/4c7a21e5-585f-495b-98a8-d86530e2ab41/processed']' returned non-zero exit status 1.
