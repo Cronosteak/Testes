@@ -1,40 +1,45 @@
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'inet-sys.petrobras.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
 /nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'vpc-opensearch-domain-dev-hvtvognzh37xcfie5k7rc5benu.sa-east-1.es.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
   warnings.warn(
-OS: 200 {
-  "name" : "a5ad1418cafcb39171f312e34f0efcc2",
-  "cluster_name" : "939327882667:opensearch-domain-dev",
-  "cluster_uuid" : "bbO5yTUeRGuqipMbphTg-g",
-  "version" : {
-    "distribution" : "opensearch"
+[CREATE] geolake_bm25 -> a12083-geolake_bm25: 200
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'inet-sys.petrobras.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+[FETCH] geolake_bm25: 34
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'vpc-opensearch-domain-dev-hvtvognzh37xcfie5k7rc5benu.sa-east-1.es.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+[BULK]  a12083-geolake_bm25: indexed=34, errors=0
 
----------------------------------------------------------------------------
-TimeoutError                              Traceback (most recent call last)
-File /nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connection.py:204, in HTTPConnection._new_conn(self)
-    203 try:
---> 204     sock = connection.create_connection(
-    205         (self._dns_host, self.port),
-    206         self.timeout,
-    207         source_address=self.source_address,
-    208         socket_options=self.socket_options,
-    209     )
-    210 except socket.gaierror as e:
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'inet-sys.petrobras.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'vpc-opensearch-domain-dev-hvtvognzh37xcfie5k7rc5benu.sa-east-1.es.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+[CREATE] geolake_docling -> a12083-geolake_docling: 200
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'inet-sys.petrobras.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+[FETCH] geolake_docling: 33
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'vpc-opensearch-domain-dev-hvtvognzh37xcfie5k7rc5benu.sa-east-1.es.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+[BULK]  a12083-geolake_docling: indexed=33, errors=0
 
-File /nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/util/connection.py:85, in create_connection(address, timeout, source_address, socket_options)
-     84 try:
----> 85     raise err
-     86 finally:
-     87     # Break explicitly a reference cycle
+[CREATE] geolake_embeddings -> a12083-geolake_embeddings: 400
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'inet-sys.petrobras.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'vpc-opensearch-domain-dev-hvtvognzh37xcfie5k7rc5benu.sa-east-1.es.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'inet-sys.petrobras.com.br'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+[FETCH] geolake_embeddings: 33
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'vpc-opensearch-domain-dev-hvtvognzh37xcfie5k7rc5benu.sa-east-1.es.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+[BULK]  a12083-geolake_embeddings: indexed=33, errors=0
 
-File /nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/util/connection.py:73, in create_connection(address, timeout, source_address, socket_options)
-     72     sock.bind(source_address)
----> 73 sock.connect(sa)
-     74 # Break explicitly a reference cycle
-
-TimeoutError: timed out
-...
---> 665         raise ConnectTimeout(e, request=request)
-    667 if isinstance(e.reason, ResponseError):
-    668     raise RetryError(e, request=request)
-
-ConnectTimeout: HTTPConnectionPool(host='souelvis.ddns.net', port=59200): Max retries exceeded with url: / (Caused by ConnectTimeoutError(<HTTPConnection(host='souelvis.ddns.net', port=59200) at 0x1497841f6fe0>, 'Connection to souelvis.ddns.net timed out. (connect timeout=10)'))
-Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
+a12083-geolake_bm25 {"count":34,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0}}
+a12083-geolake_docling {"count":33,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0}}
+a12083-geolake_embeddings {"count":0,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0}}
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'vpc-opensearch-domain-dev-hvtvognzh37xcfie5k7rc5benu.sa-east-1.es.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'vpc-opensearch-domain-dev-hvtvognzh37xcfie5k7rc5benu.sa-east-1.es.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+/nethome/projetos30/w_geolake/users/Breinner/venv/lib/python3.10/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host 'vpc-opensearch-domain-dev-hvtvognzh37xcfie5k7rc5benu.sa-east-1.es.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
