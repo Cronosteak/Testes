@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH -p gpu
 #SBATCH -J test1
-#SBATCH --account=
+#SBATCH --account=prosei
 #SBATCH --gres=gpu:3
 #SBATCH -o slurm.out
 #SBATCH -e slurm.err
@@ -30,8 +30,18 @@ export PATH=$NODE_HOME/bin:$PATH
 export SINGULARITYENV_NODE_HOME=$NODE_HOME
 export SINGULARITYENV_PATH="$NODE_HOME/bin:$PATH"
 
+# =========================
+# Tesseract (OCR) - host -> container
+# =========================
+export TESS_HOME="$BASE/local/tesseract"
+export PATH="$TESS_HOME/bin:$PATH"
+export LD_LIBRARY_PATH="$TESS_HOME/lib:$LD_LIBRARY_PATH"
+export TESSDATA_PREFIX="$TESS_HOME/share/tessdata"
+
+
+
 # Proxy (igual que tienes ahora)
-export HTTP_PROXY="http://usuario:senha@inet-sys.petrobras.com.br:804"
+export HTTP_PROXY="http://user:senha%24%24@inet-sys.petrobras.com.br:804"
 export HTTPS_PROXY=$HTTP_PROXY
 export http_proxy=$HTTP_PROXY
 export https_proxy=$HTTP_PROXY
@@ -44,7 +54,7 @@ export REQUESTS_CA_BUNDLE=$CERT_FILE
 export SSL_CERT_FILE=$CERT_FILE
 
 # Propagar variables al contenedor
-export SINGULARITYENV_HOME=$HOME
+# export SINGULARITYENV_HOME=$HOME
 export SINGULARITYENV_TMPDIR=$TMPDIR
 export SINGULARITYENV_PIP_CACHE_DIR=$PIP_CACHE_DIR
 export SINGULARITYENV_XDG_CACHE_HOME=$XDG_CACHE_HOME
@@ -59,14 +69,23 @@ export SINGULARITYENV_no_proxy=$no_proxy
 export SINGULARITYENV_REQUESTS_CA_BUNDLE=$REQUESTS_CA_BUNDLE
 export SINGULARITYENV_SSL_CERT_FILE=$SSL_CERT_FILE
 
+# Propagar al contenedor
+export SINGULARITYENV_TESS_HOME="$TESS_HOME"
+export SINGULARITYENV_PATH="$TESS_HOME/bin:$SINGULARITYENV_PATH"
+export SINGULARITYENV_LD_LIBRARY_PATH="$TESS_HOME/lib:$SINGULARITYENV_LD_LIBRARY_PATH"
+export SINGULARITYENV_TESSDATA_PREFIX="$TESSDATA_PREFIX"
+
 # Info útil
 export NODEIP=$(ifconfig | grep -oP 'inet\s+\K[\d.]+' | head -n1)
 echo $SLURM_JOB_NODELIST
 echo "SLURM_JOBID: $SLURM_JOBID"
-echo -e "Tunnels:\nssh -L 3001:$NODEIP:3001 -L 3003:$NODEIP:3003 $USER@$NODEIP"
+echo -e "Tunnels:\nssh -L 3002:$NODEIP:3002 -L 3003:$NODEIP:3003 $USER@$NODEIP"
 
 # Lanzar VSCode server dentro del contenedor con GPU
-singularity run --nv --fakeroot --writable-tmpfs -B /nethome:/nethome --hostname 0.0.0.0 "$SIF_PATH" \
-  bash -c "$VSCODE_PATH --port 3001 --user-data-dir='$HOME' --without-connection-token --host 0.0.0.0 ." &
+singularity run --nv --fakeroot --writable-tmpfs \
+  -B /nethome:/nethome \
+  --home "$HOME" \
+  "$SIF_PATH" \
+  bash -lc "$VSCODE_PATH --port 3002 --user-data-dir='$HOME' --without-connection-token --host 0.0.0.0 ."
 
 sleep 48h
