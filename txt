@@ -1,24 +1,21 @@
-INFO:api_fisc_internal:Received pipeline trigger for job: 3a7061a5-ee90-4cd5-8e8c-c60533bcc991
-INFO:     10.30.120.252:46882 - "POST /pipeline/run HTTP/1.1" 200 OK
-INFO:pipeline_worker:Starting pipeline for Job ID: 3a7061a5-ee90-4cd5-8e8c-c60533bcc991
 INFO:pipeline_worker:[pipeline] Running script: convert_documents.py
 INFO:pipeline_worker:[convert_documents.py] stdout:
-2026-02-04 16:43:40,307 - Prosei-test - INFO - (logging_config.py:49) - Logger setup complete.
-2026-02-04 16:43:40,307 - Prosei-test - INFO - (convert_documents.py:140) - --- Document Conversion Script Started ---
-2026-02-04 16:43:40,309 - Prosei-test - INFO - (convert_documents.py:51) - Loading configuration from: /nethome/prosei_d/Prosei/prosei-api-fiscalizacion/configs/convert_config.json
-2026-02-04 16:43:40,310 - Prosei-test - INFO - (convert_documents.py:71) - Instantiating converter: DoclingJsonTablesExporter with parameters: {'do_ocr': True, 'do_table_structure': True, 'do_cell_matching': True}
-2026-02-04 16:43:40,321 - Prosei-test - INFO - (convert_documents.py:167) - Input directory set to: /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/raw
-2026-02-04 16:43:40,322 - Prosei-test - INFO - (convert_documents.py:168) - Output directory set to: /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/processed
-2026-02-04 16:43:40,324 - Prosei-test - INFO - (convert_documents.py:95) - Found 1 PDF(s) to process.
-2026-02-04 16:43:40,325 - Prosei-test - INFO - (converters.py:126) - Starting Docling JSON+tables conversion for: /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/raw/input.pdf
-2026-02-04 16:43:42,105 - Prosei-test - WARNING - (converters.py:132) - Docling table-structure backend unavailable (libgthread-2.0.so.0: cannot open shared object file: No such file or directory). Rebuilding converter without table_structure/cell_matching.
-2026-02-04 16:43:47,788 - Prosei-test - INFO - (base_converter.py:46) - Successfully saved Markdown to /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/processed/input.txt
-2026-02-04 16:43:49,419 - Prosei-test - INFO - (convert_documents.py:119) - --- Processing Summary ---
-2026-02-04 16:43:49,420 - Prosei-test - INFO - (convert_documents.py:120) - Successfully converted: 1
-2026-02-04 16:43:49,421 - Prosei-test - INFO - (convert_documents.py:121) - Failed to convert:    0
-2026-02-04 16:43:49,421 - Prosei-test - INFO - (convert_documents.py:122) - Total files:           1
-2026-02-04 16:43:49,424 - Prosei-test - INFO - (converters.py:246) - Saved tables_index.json with 20 entries in /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/processed/tables_index.json
-2026-02-04 16:43:49,424 - Prosei-test - INFO - (convert_documents.py:171) - --- Document Conversion Script Finished ---
+2026-02-06 08:31:51,161 - Prosei-test - INFO - (logging_config.py:49) - Logger setup complete.
+2026-02-06 08:31:51,161 - Prosei-test - INFO - (convert_documents.py:139) - --- Document Conversion Script Started ---
+2026-02-06 08:31:51,163 - Prosei-test - INFO - (convert_documents.py:51) - Loading configuration from: /nethome/prosei_d/Prosei/prosei-api-fiscalizacion/configs/convert_config.json
+2026-02-06 08:31:51,163 - Prosei-test - INFO - (convert_documents.py:71) - Instantiating converter: DoclingJsonTablesExporter with parameters: {'do_ocr': True, 'do_table_structure': True, 'do_cell_matching': True}
+2026-02-06 08:31:51,173 - Prosei-test - INFO - (convert_documents.py:166) - Input directory set to: /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/raw
+2026-02-06 08:31:51,174 - Prosei-test - INFO - (convert_documents.py:167) - Output directory set to: /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/processed
+2026-02-06 08:31:51,176 - Prosei-test - INFO - (convert_documents.py:95) - Found 1 PDF(s) to process.
+2026-02-06 08:31:51,177 - Prosei-test - INFO - (converters.py:143) - Starting Docling JSON+tables conversion for: /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/raw/input.pdf
+2026-02-06 08:31:52,772 - Prosei-test - WARNING - (converters.py:148) - Docling table-structure backend unavailable (libgthread-2.0.so.0: cannot open shared object file: No such file or directory). Rebuilding converter without table_structure/cell_matching.
+2026-02-06 08:31:58,643 - Prosei-test - INFO - (base_converter.py:46) - Successfully saved Markdown to /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/processed/input.md
+2026-02-06 08:31:58,657 - Prosei-test - INFO - (convert_documents.py:118) - --- Processing Summary ---
+2026-02-06 08:31:58,657 - Prosei-test - INFO - (convert_documents.py:119) - Successfully converted: 1
+2026-02-06 08:31:58,658 - Prosei-test - INFO - (convert_documents.py:120) - Failed to convert:    0
+2026-02-06 08:31:58,658 - Prosei-test - INFO - (convert_documents.py:121) - Total files:           1
+2026-02-06 08:31:58,659 - Prosei-test - INFO - (converters.py:321) - No tables were collected; skipping tables_index.json
+2026-02-06 08:31:58,659 - Prosei-test - INFO - (convert_documents.py:170) - --- Document Conversion Script Finished ---
 
 WARNING:pipeline_worker:[convert_documents.py] stderr:
 /nethome/prosei_d/Prosei/prosei-api-fiscalizacion/venv/lib/python3.10/site-packages/pydantic/main.py:464: UserWarning: Pydantic serializer warnings:
@@ -28,66 +25,57 @@ No OCR engine found. Please review the install details.
 No OCR engine found. Please review the install details.
 -> Cannot close object, library is destroyed. This may cause a memory leak!
 
-INFO:pipeline_worker:[pipeline] Stage 'conversion' finished in 20.57 seconds
+INFO:pipeline_worker:[pipeline] Stage 'conversion' finished in 18.82 seconds
 INFO:pipeline_worker:[pipeline] Running script: preprocess_texts.py
 INFO:pipeline_worker:[preprocess_texts.py] stdout:
-2026-02-04 16:43:50,647 - Prosei-test - INFO - (logging_config.py:49) - Logger setup complete.
-2026-02-04 16:43:50,647 - Prosei-test - INFO - (preprocess_texts.py:88) - --- Text Preprocessing Script Started ---
-2026-02-04 16:43:50,650 - Prosei-test - INFO - (preprocess_texts.py:40) - Loading configuration from: /nethome/prosei_d/Prosei/prosei-api-fiscalizacion/configs/preprocess_config.json
-2026-02-04 16:43:50,651 - Prosei-test - INFO - (preprocess_texts.py:114) - Input directory: /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/processed
-2026-02-04 16:43:50,651 - Prosei-test - INFO - (preprocess_texts.py:115) - Output directory: /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/cleaned
-2026-02-04 16:43:50,652 - Prosei-test - INFO - (preprocess_texts.py:116) - Enabled steps: ['remove_excessive_line_breaks', 'to_lowercase']
-2026-02-04 16:43:50,655 - Prosei-test - INFO - (preprocess_texts.py:61) - Found 1 file(s) to process.
-2026-02-04 16:43:50,660 - Prosei-test - INFO - (preprocess_texts.py:79) - --- Preprocessing Summary ---
-2026-02-04 16:43:50,661 - Prosei-test - INFO - (preprocess_texts.py:80) - Processed 1 files.
-2026-02-04 16:43:50,662 - Prosei-test - INFO - (preprocess_texts.py:120) - --- Text Preprocessing Script Finished ---
+2026-02-06 08:31:59,880 - Prosei-test - INFO - (logging_config.py:49) - Logger setup complete.
+2026-02-06 08:31:59,880 - Prosei-test - INFO - (preprocess_texts.py:88) - --- Text Preprocessing Script Started ---
+2026-02-06 08:31:59,882 - Prosei-test - INFO - (preprocess_texts.py:40) - Loading configuration from: /nethome/prosei_d/Prosei/prosei-api-fiscalizacion/configs/preprocess_config.json
+2026-02-06 08:31:59,883 - Prosei-test - INFO - (preprocess_texts.py:114) - Input directory: /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/processed
+2026-02-06 08:31:59,883 - Prosei-test - INFO - (preprocess_texts.py:115) - Output directory: /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/cleaned
+2026-02-06 08:31:59,883 - Prosei-test - INFO - (preprocess_texts.py:116) - Enabled steps: ['remove_excessive_line_breaks', 'to_lowercase']
+2026-02-06 08:31:59,886 - Prosei-test - WARNING - (preprocess_texts.py:58) - No Markdown files found in /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/processed
+2026-02-06 08:31:59,886 - Prosei-test - INFO - (preprocess_texts.py:120) - --- Text Preprocessing Script Finished ---
 
-INFO:pipeline_worker:[pipeline] Stage 'preprocessing' finished in 0.08 seconds
+INFO:pipeline_worker:[pipeline] Stage 'preprocessing' finished in 0.07 seconds
 INFO:pipeline_worker:[pipeline] Running script: segment_documents.py
 INFO:pipeline_worker:[segment_documents.py] stdout:
-2026-02-04 16:43:51,622 - Prosei-test - INFO - (logging_config.py:49) - Logger setup complete.
-2026-02-04 16:43:51,622 - Prosei-test - INFO - (segment_documents.py:177) - --- Document Segmentation Script Started ---
-2026-02-04 16:43:51,624 - Prosei-test - INFO - (segment_documents.py:56) - Loading configuration from: /nethome/prosei_d/Prosei/prosei-api-fiscalizacion/configs/segment_config.json
-2026-02-04 16:43:51,625 - Prosei-test - INFO - (segment_documents.py:102) - Instantiating splitter: rules
-2026-02-04 16:43:51,626 - Prosei-test - INFO - (segment_documents.py:206) - Input directory: /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/cleaned
-2026-02-04 16:43:51,626 - Prosei-test - INFO - (segment_documents.py:207) - Output directory: /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/segmented
-2026-02-04 16:43:51,628 - Prosei-test - INFO - (segment_documents.py:131) - Found 1 file(s) to segment.
-2026-02-04 16:43:51,633 - Prosei-test - INFO - (segment_documents.py:168) - --- Segmentation Summary ---
-2026-02-04 16:43:51,634 - Prosei-test - INFO - (segment_documents.py:169) - Processed 1 files.
-2026-02-04 16:43:51,635 - Prosei-test - INFO - (segment_documents.py:212) - --- Document Segmentation Script Finished ---
+2026-02-06 08:32:00,849 - Prosei-test - INFO - (logging_config.py:49) - Logger setup complete.
+2026-02-06 08:32:00,849 - Prosei-test - INFO - (segment_documents.py:177) - --- Document Segmentation Script Started ---
+2026-02-06 08:32:00,851 - Prosei-test - INFO - (segment_documents.py:56) - Loading configuration from: /nethome/prosei_d/Prosei/prosei-api-fiscalizacion/configs/segment_config.json
+2026-02-06 08:32:00,852 - Prosei-test - INFO - (segment_documents.py:102) - Instantiating splitter: rules
+2026-02-06 08:32:00,852 - Prosei-test - INFO - (segment_documents.py:206) - Input directory: /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/cleaned
+2026-02-06 08:32:00,852 - Prosei-test - INFO - (segment_documents.py:207) - Output directory: /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/segmented
+2026-02-06 08:32:00,854 - Prosei-test - WARNING - (segment_documents.py:128) - No Markdown files found in /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/cleaned
+2026-02-06 08:32:00,854 - Prosei-test - INFO - (segment_documents.py:212) - --- Document Segmentation Script Finished ---
 
 INFO:pipeline_worker:[pipeline] Stage 'segmenting' finished in 1.02 seconds
 INFO:pipeline_worker:[pipeline] Running script: tag_blocks.py
 INFO:pipeline_worker:[tag_blocks.py] stdout:
-2026-02-04 16:43:52,458 - Prosei-test - INFO - (logging_config.py:49) - Logger setup complete.
-2026-02-04 16:43:52,458 - Prosei-test - INFO - (tag_blocks.py:143) - --- Document Tagging Script Started ---
-2026-02-04 16:43:52,460 - Prosei-test - INFO - (tag_blocks.py:49) - Loading Azure credentials for BlockTagger...
-2026-02-04 16:43:52,461 - Prosei-test - INFO - (tag_blocks.py:64) - Instantiating BlockTagger for endpoint: https://apit.petrobras.com.br/ia/openai/v1/openai-azure
-2026-02-04 16:43:52,524 - Prosei-test - INFO - (tag_blocks.py:164) - Input directory: /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/segmented
-2026-02-04 16:43:52,525 - Prosei-test - INFO - (tag_blocks.py:165) - Output directory: /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/tagged
-2026-02-04 16:43:52,527 - Prosei-test - INFO - (tag_blocks.py:90) - Found 1 file(s) to tag.
-2026-02-04 16:43:52,528 - Prosei-test - INFO - (tag_blocks.py:103) - Tagging 37 blocks for page_1...
-2026-02-04 16:44:50,835 - Prosei-test - INFO - (tag_blocks.py:134) - --- Tagging Summary ---
-2026-02-04 16:44:50,835 - Prosei-test - INFO - (tag_blocks.py:135) - Processed 1 files.
-2026-02-04 16:44:50,836 - Prosei-test - INFO - (tag_blocks.py:170) - --- Document Tagging Script Finished ---
+2026-02-06 08:32:01,701 - Prosei-test - INFO - (logging_config.py:49) - Logger setup complete.
+2026-02-06 08:32:01,702 - Prosei-test - INFO - (tag_blocks.py:143) - --- Document Tagging Script Started ---
+2026-02-06 08:32:01,703 - Prosei-test - INFO - (tag_blocks.py:49) - Loading Azure credentials for BlockTagger...
+2026-02-06 08:32:01,703 - Prosei-test - INFO - (tag_blocks.py:64) - Instantiating BlockTagger for endpoint: https://apit.petrobras.com.br/ia/openai/v1/openai-azure
+2026-02-06 08:32:01,764 - Prosei-test - INFO - (tag_blocks.py:164) - Input directory: /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/segmented
+2026-02-06 08:32:01,764 - Prosei-test - INFO - (tag_blocks.py:165) - Output directory: /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/tagged
+2026-02-06 08:32:01,767 - Prosei-test - WARNING - (tag_blocks.py:87) - No segmented JSON files found in /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/segmented
+2026-02-06 08:32:01,767 - Prosei-test - INFO - (tag_blocks.py:170) - --- Document Tagging Script Finished ---
 
-INFO:pipeline_worker:[pipeline] Stage 'tagging' finished in 59.25 seconds
+INFO:pipeline_worker:[pipeline] Stage 'tagging' finished in 0.91 seconds
 INFO:pipeline_worker:[pipeline] Running script: verify_documents.py
 INFO:pipeline_worker:[verify_documents.py] stdout:
-2026-02-04 16:44:52,074 - Prosei-test - INFO - (logging_config.py:49) - Logger setup complete.
-2026-02-04 16:44:52,074 - Prosei-test - INFO - (verify_documents.py:223) - --- Document Verification Script Started ---
-2026-02-04 16:44:52,076 - Prosei-test - INFO - (verify_documents.py:42) - Loading configuration from: /nethome/prosei_d/Prosei/prosei-api-fiscalizacion/configs/verify_config.json
-2026-02-04 16:44:52,078 - Prosei-test - INFO - (verification_loader.py:30) - Loading verification rules from: /nethome/prosei_d/Prosei/prosei-api-fiscalizacion/configs/rules_lista_cargas.json
-2026-02-04 16:44:52,078 - Prosei-test - INFO - (verification_loader.py:44) - Successfully loaded 25 rules for 'Lista de Cargas'.
-2026-02-04 16:44:52,079 - Prosei-test - INFO - (verify_documents.py:49) - Loading Azure credentials for DocumentVerifier...
-2026-02-04 16:44:52,080 - Prosei-test - INFO - (verify_documents.py:64) - Instantiating DocumentVerifier for endpoint: https://apit.petrobras.com.br/ia/openai/v1/openai-azure
-2026-02-04 16:44:52,136 - Prosei-test - INFO - (verify_documents.py:253) - Input directory: /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/tagged
-2026-02-04 16:44:52,136 - Prosei-test - INFO - (verify_documents.py:254) - Output directory: /nethome/prosei_d/Prosei/shared_data/jobs/3a7061a5-ee90-4cd5-8e8c-c60533bcc991/verification_reports
-2026-02-04 16:44:52,137 - Prosei-test - INFO - (verify_documents.py:255) - Document type: lista_cargas (25 rules loaded)
-2026-02-04 16:44:52,139 - Prosei-test - INFO - (verify_documents.py:193) - Found 1 file(s) to verify.
-2026-02-04 16:45:44,221 - Prosei-test - INFO - (verify_documents.py:216) - --- Verification Summary ---
-2026-02-04 16:45:44,222 - Prosei-test - INFO - (verify_documents.py:217) - Processed 1 files.
-2026-02-04 16:45:44,223 - Prosei-test - INFO - (verify_documents.py:259) - --- Document Verification Script Finished ---
+2026-02-06 08:32:02,684 - Prosei-test - INFO - (logging_config.py:49) - Logger setup complete.
+2026-02-06 08:32:02,685 - Prosei-test - INFO - (verify_documents.py:223) - --- Document Verification Script Started ---
+2026-02-06 08:32:02,686 - Prosei-test - INFO - (verify_documents.py:42) - Loading configuration from: /nethome/prosei_d/Prosei/prosei-api-fiscalizacion/configs/verify_config.json
+2026-02-06 08:32:02,687 - Prosei-test - INFO - (verification_loader.py:30) - Loading verification rules from: /nethome/prosei_d/Prosei/prosei-api-fiscalizacion/configs/rules_lista_cargas.json
+2026-02-06 08:32:02,687 - Prosei-test - INFO - (verification_loader.py:44) - Successfully loaded 25 rules for 'Lista de Cargas'.
+2026-02-06 08:32:02,687 - Prosei-test - INFO - (verify_documents.py:49) - Loading Azure credentials for DocumentVerifier...
+2026-02-06 08:32:02,688 - Prosei-test - INFO - (verify_documents.py:64) - Instantiating DocumentVerifier for endpoint: https://apit.petrobras.com.br/ia/openai/v1/openai-azure
+2026-02-06 08:32:02,740 - Prosei-test - INFO - (verify_documents.py:253) - Input directory: /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/tagged
+2026-02-06 08:32:02,740 - Prosei-test - INFO - (verify_documents.py:254) - Output directory: /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/verification_reports
+2026-02-06 08:32:02,741 - Prosei-test - INFO - (verify_documents.py:255) - Document type: lista_cargas (25 rules loaded)
+2026-02-06 08:32:02,745 - Prosei-test - WARNING - (verify_documents.py:190) - No tagged JSON files found in /nethome/prosei_d/Prosei/shared_data/jobs/69867aed-5f87-45aa-981c-06d13285a250/tagged
+2026-02-06 08:32:02,745 - Prosei-test - INFO - (verify_documents.py:259) - --- Document Verification Script Finished ---
 
-INFO:pipeline_worker:[pipeline] Stage 'verifying' finished in 53.40 seconds
-INFO:pipeline_worker:Pipeline finished successfully for 3a7061a5-ee90-4cd5-8e8c-c60533bcc991 in 134.33 seconds
+INFO:pipeline_worker:[pipeline] Stage 'verifying' finished in 0.98 seconds
+INFO:pipeline_worker:Pipeline finished successfully for 69867aed-5f87-45aa-981c-06d13285a250 in 21.83 seconds
