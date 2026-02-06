@@ -1,111 +1,72 @@
-# app/jobs.py
-from __future__ import annotations
-from dataclasses import dataclass, asdict
-from datetime import datetime
-from pathlib import Path
-import json
-import threading
-from typing import Optional
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --ntasks=1
+#SBATCH -p gpu
+#SBATCH -J test1
+#SBATCH --account=
+#SBATCH --gres=gpu:3
+#SBATCH -o slurm.out
+#SBATCH -e slurm.err
+#SBATCH --time=48:00:00
 
-from .config import JOBS_DIR
+# Rutas persistentes del usuario
+export BASE=/nethome/prosei_d/Prosei
+CA_ROOT="$BASE/prosei-research-developv2/"
+export HOME=$BASE/home
+export TMPDIR=$BASE/tmp
+export PIP_CACHE_DIR=$BASE/cache/pip
+export XDG_CACHE_HOME=$BASE/cache/xdg
+export PYTHONUSERBASE=$BASE/cache/python_userbase
 
-_lock = threading.Lock()
+# Imagen y VSCode Server (tus rutas actuales)
+export SIF_PATH=$BASE/singularity/rag2.sif
+export VSCODE_PATH=$BASE/openvscode-server-v1.101.1-linux-x64/bin/openvscode-server
 
-@dataclass
-class Job:
-    job_id: str
-    status: str     
-    stage: str       
-    message: Optional[str]
-    created_at: str
-    updated_at: str
-    original_filename: str
+export NODE_HOME=$BASE/node-v22.21.1/node-v22.21.1-linux-x64
+export PATH=$NODE_HOME/bin:$PATH
 
-    @property
-    def job_dir(self) -> Path:
-        return JOBS_DIR / self.job_id
+# Pasar Node al contenedor también
+export SINGULARITYENV_NODE_HOME=$NODE_HOME
+export SINGULARITYENV_PATH="$NODE_HOME/bin:$PATH"
 
-    @property
-    def report_dir(self) -> Path:
-        return self.job_dir / "verification_reports"
+# Proxy (igual que tienes ahora)
+export HTTP_PROXY="http://usuario:senha@inet-sys.petrobras.com.br:804"
+export HTTPS_PROXY=$HTTP_PROXY
+export http_proxy=$HTTP_PROXY
+export https_proxy=$HTTP_PROXY
+export NO_PROXY="localhost,127.0.0.1,petrobras.com.br,petrobras.biz"
+export no_proxy=$NO_PROXY
 
-    @property
-    def report_file(self) -> Optional[Path]:
-        if not self.report_dir.exists():
-            return None
-        files = list(self.report_dir.glob("*"))
-        return files[0] if files else None
+# CA Certification
+export CERT_FILE="$CA_ROOT/petrobras-ca-root.pem"
+export REQUESTS_CA_BUNDLE=$CERT_FILE
+export SSL_CERT_FILE=$CERT_FILE
 
+# Propagar variables al contenedor
+export SINGULARITYENV_HOME=$HOME
+export SINGULARITYENV_TMPDIR=$TMPDIR
+export SINGULARITYENV_PIP_CACHE_DIR=$PIP_CACHE_DIR
+export SINGULARITYENV_XDG_CACHE_HOME=$XDG_CACHE_HOME
+export SINGULARITYENV_PYTHONUSERBASE=$PYTHONUSERBASE
+export SINGULARITYENV_HTTP_PROXY=$HTTP_PROXY
+export SINGULARITYENV_HTTPS_PROXY=$HTTPS_PROXY
+export SINGULARITYENV_NO_PROXY=$NO_PROXY
+export SINGULARITYENV_http_proxy=$http_proxy
+export SINGULARITYENV_https_proxy=$https_proxy
+export SINGULARITYENV_no_proxy=$no_proxy 
 
-_jobs_memory: dict[str, Job] = {}
+export SINGULARITYENV_REQUESTS_CA_BUNDLE=$REQUESTS_CA_BUNDLE
+export SINGULARITYENV_SSL_CERT_FILE=$SSL_CERT_FILE
 
+# Info útil
+export NODEIP=$(ifconfig | grep -oP 'inet\s+\K[\d.]+' | head -n1)
+echo $SLURM_JOB_NODELIST
+echo "SLURM_JOBID: $SLURM_JOBID"
+echo -e "Tunnels:\nssh -L 3001:$NODEIP:3001 -L 3003:$NODEIP:3003 $USER@$NODEIP"
 
-def _job_meta_path(job_id: str) -> Path:
-    return JOBS_DIR / job_id / "job_meta.json"
+# Lanzar VSCode server dentro del contenedor con GPU
+singularity run --nv --fakeroot --writable-tmpfs -B /nethome:/nethome --hostname 0.0.0.0 "$SIF_PATH" \
+  bash -c "$VSCODE_PATH --port 3001 --user-data-dir='$HOME' --without-connection-token --host 0.0.0.0 ." &
 
-
-def create_job(job_id: str, original_filename: str) -> Job:
-    now = datetime.utcnow().isoformat()
-    job = Job(
-        job_id=job_id,
-        status="queued",
-        stage="pending",
-        message=None,
-        created_at=now,
-        updated_at=now,
-        original_filename=original_filename,
-    )
-
-    with _lock:
-        _jobs_memory[job_id] = job
-        job.job_dir.mkdir(parents=True, exist_ok=True)
-        save_job(job)
-
-    return job
-
-
-def save_job(job: Job) -> None:
-    meta_path = _job_meta_path(job.job_id)
-    meta_path.parent.mkdir(parents=True, exist_ok=True)
-    with meta_path.open("w", encoding="utf-8") as f:
-        json.dump(asdict(job), f, indent=2)
-
-
-def load_job(job_id: str) -> Optional[Job]:
-    with _lock:
-        if job_id in _jobs_memory:
-            return _jobs_memory[job_id]
-
-    meta_path = _job_meta_path(job_id)
-    if not meta_path.exists():
-        return None
-
-    with meta_path.open("r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    job = Job(**data)
-    with _lock:
-        _jobs_memory[job_id] = job
-    return job
-
-
-def update_job(job_id: str, *, status: Optional[str] = None,
-               stage: Optional[str] = None,
-               message: Optional[str] = None) -> Job:
-    job = load_job(job_id)
-    if job is None:
-        raise KeyError(f"Job {job_id} not found")
-
-    if status is not None:
-        job.status = status
-    if stage is not None:
-        job.stage = stage
-    if message is not None:
-        job.message = message
-
-    job.updated_at = datetime.utcnow().isoformat()
-    with _lock:
-        _jobs_memory[job_id] = job
-        save_job(job)
-
-    return job
+sleep 48h
