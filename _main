@@ -1,6 +1,14 @@
-[g4kz@atn1mg4 build]$ cd /nethome/prosei_d/Prosei/local/tesseract-src && git fetch --tags && git checkout 4.1.1
-Updating files: 100% (820/820), done.
-Note: switching to '4.1.1'.
+[g4kz@atn1mg4 build]$ cd /nethome/prosei_d/Prosei/local && rm -rf leptonica-src && git clone https://github.com/DanBloomberg/leptonica.git leptonica-src && cd leptonica-src && git checkout 1.79.0 && rm -rf build && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/nethome/prosei_d/Prosei/local/tesseract && make -j8 && make install
+Cloning into 'leptonica-src'...
+remote: Enumerating objects: 16826, done.
+remote: Counting objects: 100% (5101/5101), done.
+remote: Compressing objects: 100% (569/569), done.
+remote: Total 16826 (delta 4642), reused 4532 (delta 4532), pack-reused 11725 (from 3)
+Receiving objects: 100% (16826/16826), 23.17 MiB | 31.59 MiB/s, done.
+Resolving deltas: 100% (13588/13588), done.
+Updating files: 100% (988/988), done.
+Updating files: 100% (581/581), done.
+Note: switching to '1.79.0'.
 
 You are in 'detached HEAD' state. You can look around, make experimental
 changes and commit them, and you can discard any commits you make in this
@@ -17,8 +25,311 @@ Or undo this operation with:
 
 Turn off this advice by setting config variable advice.detachedHead to false
 
-HEAD is now at 75103040 4.1.1 Release
-[g4kz@atn1mg4 tesseract-src]$ cd /nethome/prosei_d/Prosei/local/tesseract-src && rm -rf build && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/nethome/prosei_d/Prosei/local/tesseract -DCMAKE_PREFIX_PATH=/nethome/prosei_d/Prosei/local/tesseract -DBUILD_TRAINING_TOOLS=OFF
+HEAD is now at 002843bd Yet another small restriction on bmp input data.
+CMake Deprecation Warning at CMakeLists.txt:11 (cmake_minimum_required):
+  Compatibility with CMake < 2.8.12 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+-- The C compiler identification is GNU 6.2.0
+-- The CXX compiler identification is GNU 6.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /netprodapps/prod_apps/gcc/6.2.0/bin/gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /netprodapps/prod_apps/gcc/6.2.0/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found GIF: /usr/lib64/libgif.so (found version "5.1.4")
+-- Found JPEG: /usr/lib64/libjpeg.so (found version "62")
+-- Found ZLIB: /usr/lib64/libz.so (found version "1.2.11")
+-- Found PNG: /usr/lib64/libpng.so (found version "1.6.34")
+-- Found TIFF: /usr/lib64/libtiff.so (found version "4.0.9")
+-- Found PkgConfig: /usr/bin/pkg-config (found version "1.4.2")
+CMAKE_BUILD_TYPE = Release
+-- Looking for include file dlfcn.h
+-- Looking for include file dlfcn.h - found
+-- Looking for include file inttypes.h
+-- Looking for include file inttypes.h - found
+-- Looking for include file memory.h
+-- Looking for include file memory.h - found
+-- Looking for include file stdint.h
+-- Looking for include file stdint.h - found
+-- Looking for include file stdlib.h
+-- Looking for include file stdlib.h - found
+-- Looking for include file strings.h
+-- Looking for include file strings.h - found
+-- Looking for include file string.h
+-- Looking for include file string.h - found
+-- Looking for include file sys/stat.h
+-- Looking for include file sys/stat.h - found
+-- Looking for include file sys/types.h
+-- Looking for include file sys/types.h - found
+-- Looking for include file unistd.h
+-- Looking for include file unistd.h - found
+-- Looking for include file openjpeg-2.0/openjpeg.h
+-- Looking for include file openjpeg-2.0/openjpeg.h - not found
+-- Looking for include file openjpeg-2.1/openjpeg.h
+-- Looking for include file openjpeg-2.1/openjpeg.h - not found
+-- Looking for include file openjpeg-2.2/openjpeg.h
+-- Looking for include file openjpeg-2.2/openjpeg.h - not found
+-- Looking for include file openjpeg-2.3/openjpeg.h
+-- Looking for include file openjpeg-2.3/openjpeg.h - not found
+-- Looking for fmemopen
+-- Looking for fmemopen - found
+-- Looking for fstatat
+-- Looking for fstatat - found
+--
+-- General configuration for Leptonica 1.79.0
+-- --------------------------------------------------------
+-- Build type: Release
+-- Compiler: GNU
+-- C compiler options:
+-- Linker options:
+-- Install directory: /nethome/prosei_d/Prosei/local/tesseract
+--
+-- Build with sw [SW_BUILD]: OFF
+-- Build utility programs [BUILD_PROG]: OFF
+-- Used ZLIB library: /usr/lib64/libz.so
+-- Used PNG library:  /usr/lib64/libpng.so;/usr/lib64/libz.so
+-- Used JPEG library: /usr/lib64/libjpeg.so
+-- Used JP2K library:
+-- Used TIFF library: /usr/lib64/libtiff.so
+-- Used GIF library:  /usr/lib64/libgif.so
+-- Used WEBP library: /usr/lib64/libwebp.so;/usr/lib64/libwebpmux.so
+-- --------------------------------------------------------
+--
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /nethome/prosei_d/Prosei/local/leptonica-src/build
+[  0%] Building C object src/CMakeFiles/leptonica.dir/adaptmap.c.o
+[  1%] Building C object src/CMakeFiles/leptonica.dir/affinecompose.c.o
+[  3%] Building C object src/CMakeFiles/leptonica.dir/affine.c.o
+[  3%] Building C object src/CMakeFiles/leptonica.dir/bbuffer.c.o
+[  3%] Building C object src/CMakeFiles/leptonica.dir/arrayaccess.c.o
+[  3%] Building C object src/CMakeFiles/leptonica.dir/baseline.c.o
+[  3%] Building C object src/CMakeFiles/leptonica.dir/bardecode.c.o
+[  4%] Building C object src/CMakeFiles/leptonica.dir/bilateral.c.o
+[  5%] Building C object src/CMakeFiles/leptonica.dir/bilinear.c.o
+[  5%] Building C object src/CMakeFiles/leptonica.dir/binarize.c.o
+[  6%] Building C object src/CMakeFiles/leptonica.dir/binexpand.c.o
+[  6%] Building C object src/CMakeFiles/leptonica.dir/binreduce.c.o
+[  7%] Building C object src/CMakeFiles/leptonica.dir/blend.c.o
+[  7%] Building C object src/CMakeFiles/leptonica.dir/bmf.c.o
+[  8%] Building C object src/CMakeFiles/leptonica.dir/bmpio.c.o
+[  8%] Building C object src/CMakeFiles/leptonica.dir/bmpiostub.c.o
+[  9%] Building C object src/CMakeFiles/leptonica.dir/bootnumgen1.c.o
+[ 10%] Building C object src/CMakeFiles/leptonica.dir/bootnumgen2.c.o
+[ 10%] Building C object src/CMakeFiles/leptonica.dir/bootnumgen3.c.o
+[ 11%] Building C object src/CMakeFiles/leptonica.dir/bootnumgen4.c.o
+[ 11%] Building C object src/CMakeFiles/leptonica.dir/boxbasic.c.o
+[ 12%] Building C object src/CMakeFiles/leptonica.dir/boxfunc2.c.o
+[ 12%] Building C object src/CMakeFiles/leptonica.dir/boxfunc1.c.o
+[ 13%] Building C object src/CMakeFiles/leptonica.dir/boxfunc3.c.o
+[ 13%] Building C object src/CMakeFiles/leptonica.dir/boxfunc4.c.o
+[ 14%] Building C object src/CMakeFiles/leptonica.dir/boxfunc5.c.o
+[ 15%] Building C object src/CMakeFiles/leptonica.dir/bytearray.c.o
+[ 15%] Building C object src/CMakeFiles/leptonica.dir/ccbord.c.o
+[ 16%] Building C object src/CMakeFiles/leptonica.dir/ccthin.c.o
+[ 17%] Building C object src/CMakeFiles/leptonica.dir/checkerboard.c.o
+[ 17%] Building C object src/CMakeFiles/leptonica.dir/classapp.c.o
+[ 17%] Building C object src/CMakeFiles/leptonica.dir/colorcontent.c.o
+[ 18%] Building C object src/CMakeFiles/leptonica.dir/coloring.c.o
+[ 18%] Building C object src/CMakeFiles/leptonica.dir/colormap.c.o
+[ 19%] Building C object src/CMakeFiles/leptonica.dir/colormorph.c.o
+[ 20%] Building C object src/CMakeFiles/leptonica.dir/colorquant1.c.o
+[ 20%] Building C object src/CMakeFiles/leptonica.dir/colorquant2.c.o
+[ 21%] Building C object src/CMakeFiles/leptonica.dir/colorseg.c.o
+[ 21%] Building C object src/CMakeFiles/leptonica.dir/colorspace.c.o
+[ 22%] Building C object src/CMakeFiles/leptonica.dir/compare.c.o
+[ 22%] Building C object src/CMakeFiles/leptonica.dir/conncomp.c.o
+[ 23%] Building C object src/CMakeFiles/leptonica.dir/convertfiles.c.o
+[ 24%] Building C object src/CMakeFiles/leptonica.dir/convolve.c.o
+[ 24%] Building C object src/CMakeFiles/leptonica.dir/correlscore.c.o
+[ 25%] Building C object src/CMakeFiles/leptonica.dir/dewarp1.c.o
+[ 25%] Building C object src/CMakeFiles/leptonica.dir/dewarp2.c.o
+[ 26%] Building C object src/CMakeFiles/leptonica.dir/dewarp3.c.o
+[ 26%] Building C object src/CMakeFiles/leptonica.dir/dewarp4.c.o
+[ 27%] Building C object src/CMakeFiles/leptonica.dir/dnabasic.c.o
+[ 27%] Building C object src/CMakeFiles/leptonica.dir/dnafunc1.c.o
+[ 28%] Building C object src/CMakeFiles/leptonica.dir/dnahash.c.o
+[ 29%] Building C object src/CMakeFiles/leptonica.dir/dwacomb.2.c.o
+[ 30%] Building C object src/CMakeFiles/leptonica.dir/edge.c.o
+[ 30%] Building C object src/CMakeFiles/leptonica.dir/dwacomblow.2.c.o
+[ 30%] Building C object src/CMakeFiles/leptonica.dir/encoding.c.o
+[ 31%] Building C object src/CMakeFiles/leptonica.dir/enhance.c.o
+[ 31%] Building C object src/CMakeFiles/leptonica.dir/fhmtauto.c.o
+[ 32%] Building C object src/CMakeFiles/leptonica.dir/fhmtgen.1.c.o
+[ 32%] Building C object src/CMakeFiles/leptonica.dir/fhmtgenlow.1.c.o
+[ 33%] Building C object src/CMakeFiles/leptonica.dir/finditalic.c.o
+[ 34%] Building C object src/CMakeFiles/leptonica.dir/flipdetect.c.o
+[ 34%] Building C object src/CMakeFiles/leptonica.dir/fliphmtgen.c.o
+[ 35%] Building C object src/CMakeFiles/leptonica.dir/fmorphauto.c.o
+[ 35%] Building C object src/CMakeFiles/leptonica.dir/fmorphgen.1.c.o
+[ 36%] Building C object src/CMakeFiles/leptonica.dir/fmorphgenlow.1.c.o
+[ 36%] Building C object src/CMakeFiles/leptonica.dir/fpix1.c.o
+[ 37%] Building C object src/CMakeFiles/leptonica.dir/fpix2.c.o
+[ 37%] Building C object src/CMakeFiles/leptonica.dir/gifio.c.o
+[ 38%] Building C object src/CMakeFiles/leptonica.dir/gifiostub.c.o
+[ 39%] Building C object src/CMakeFiles/leptonica.dir/gplot.c.o
+[ 39%] Building C object src/CMakeFiles/leptonica.dir/graphics.c.o
+[ 40%] Building C object src/CMakeFiles/leptonica.dir/graymorph.c.o
+[ 40%] Building C object src/CMakeFiles/leptonica.dir/grayquant.c.o
+[ 41%] Building C object src/CMakeFiles/leptonica.dir/heap.c.o
+[ 41%] Building C object src/CMakeFiles/leptonica.dir/jbclass.c.o
+[ 42%] Building C object src/CMakeFiles/leptonica.dir/jp2kheader.c.o
+[ 43%] Building C object src/CMakeFiles/leptonica.dir/jp2kheaderstub.c.o
+[ 43%] Building C object src/CMakeFiles/leptonica.dir/jp2kio.c.o
+[ 44%] Building C object src/CMakeFiles/leptonica.dir/jp2kiostub.c.o
+[ 44%] Building C object src/CMakeFiles/leptonica.dir/jpegio.c.o
+[ 45%] Building C object src/CMakeFiles/leptonica.dir/jpegiostub.c.o
+[ 45%] Building C object src/CMakeFiles/leptonica.dir/kernel.c.o
+[ 46%] Building C object src/CMakeFiles/leptonica.dir/leptwin.c.o
+[ 46%] Building C object src/CMakeFiles/leptonica.dir/libversions.c.o
+[ 47%] Building C object src/CMakeFiles/leptonica.dir/list.c.o
+[ 47%] Building C object src/CMakeFiles/leptonica.dir/maze.c.o
+[ 49%] Building C object src/CMakeFiles/leptonica.dir/map.c.o
+[ 49%] Building C object src/CMakeFiles/leptonica.dir/morph.c.o
+[ 50%] Building C object src/CMakeFiles/leptonica.dir/morphapp.c.o
+[ 50%] Building C object src/CMakeFiles/leptonica.dir/morphdwa.c.o
+[ 50%] Building C object src/CMakeFiles/leptonica.dir/morphseq.c.o
+[ 51%] Building C object src/CMakeFiles/leptonica.dir/numabasic.c.o
+[ 51%] Building C object src/CMakeFiles/leptonica.dir/numafunc1.c.o
+[ 52%] Building C object src/CMakeFiles/leptonica.dir/numafunc2.c.o
+[ 53%] Building C object src/CMakeFiles/leptonica.dir/pageseg.c.o
+[ 53%] Building C object src/CMakeFiles/leptonica.dir/paintcmap.c.o
+[ 54%] Building C object src/CMakeFiles/leptonica.dir/parseprotos.c.o
+[ 54%] Building C object src/CMakeFiles/leptonica.dir/partify.c.o
+[ 55%] Building C object src/CMakeFiles/leptonica.dir/partition.c.o
+[ 55%] Building C object src/CMakeFiles/leptonica.dir/pdfio1.c.o
+[ 56%] Building C object src/CMakeFiles/leptonica.dir/pdfio1stub.c.o
+[ 56%] Building C object src/CMakeFiles/leptonica.dir/pdfio2.c.o
+[ 58%] Building C object src/CMakeFiles/leptonica.dir/pix1.c.o
+[ 58%] Building C object src/CMakeFiles/leptonica.dir/pdfio2stub.c.o
+[ 58%] Building C object src/CMakeFiles/leptonica.dir/pix2.c.o
+[ 59%] Building C object src/CMakeFiles/leptonica.dir/pix3.c.o
+[ 59%] Building C object src/CMakeFiles/leptonica.dir/pix4.c.o
+[ 60%] Building C object src/CMakeFiles/leptonica.dir/pix5.c.o
+[ 60%] Building C object src/CMakeFiles/leptonica.dir/pixabasic.c.o
+[ 62%] Building C object src/CMakeFiles/leptonica.dir/pixacc.c.o
+[ 62%] Building C object src/CMakeFiles/leptonica.dir/pixafunc1.c.o
+[ 62%] Building C object src/CMakeFiles/leptonica.dir/pixafunc2.c.o
+[ 63%] Building C object src/CMakeFiles/leptonica.dir/pixalloc.c.o
+[ 63%] Building C object src/CMakeFiles/leptonica.dir/pixarith.c.o
+[ 64%] Building C object src/CMakeFiles/leptonica.dir/pixcomp.c.o
+[ 64%] Building C object src/CMakeFiles/leptonica.dir/pixconv.c.o
+[ 65%] Building C object src/CMakeFiles/leptonica.dir/pixlabel.c.o
+[ 65%] Building C object src/CMakeFiles/leptonica.dir/pixtiling.c.o
+[ 66%] Building C object src/CMakeFiles/leptonica.dir/pngio.c.o
+[ 67%] Building C object src/CMakeFiles/leptonica.dir/pngiostub.c.o
+[ 67%] Building C object src/CMakeFiles/leptonica.dir/pnmio.c.o
+[ 68%] Building C object src/CMakeFiles/leptonica.dir/pnmiostub.c.o
+[ 68%] Building C object src/CMakeFiles/leptonica.dir/projective.c.o
+[ 69%] Building C object src/CMakeFiles/leptonica.dir/psio1.c.o
+[ 69%] Building C object src/CMakeFiles/leptonica.dir/psio1stub.c.o
+[ 70%] Building C object src/CMakeFiles/leptonica.dir/psio2.c.o
+[ 70%] Building C object src/CMakeFiles/leptonica.dir/psio2stub.c.o
+[ 71%] Building C object src/CMakeFiles/leptonica.dir/ptabasic.c.o
+[ 72%] Building C object src/CMakeFiles/leptonica.dir/ptafunc1.c.o
+[ 72%] Building C object src/CMakeFiles/leptonica.dir/ptafunc2.c.o
+[ 73%] Building C object src/CMakeFiles/leptonica.dir/ptra.c.o
+[ 73%] Building C object src/CMakeFiles/leptonica.dir/quadtree.c.o
+[ 74%] Building C object src/CMakeFiles/leptonica.dir/queue.c.o
+[ 74%] Building C object src/CMakeFiles/leptonica.dir/rank.c.o
+[ 75%] Building C object src/CMakeFiles/leptonica.dir/rbtree.c.o
+[ 75%] Building C object src/CMakeFiles/leptonica.dir/readbarcode.c.o
+[ 76%] Building C object src/CMakeFiles/leptonica.dir/readfile.c.o
+[ 77%] Building C object src/CMakeFiles/leptonica.dir/recogbasic.c.o
+[ 77%] Building C object src/CMakeFiles/leptonica.dir/recogdid.c.o
+[ 78%] Building C object src/CMakeFiles/leptonica.dir/recogident.c.o
+[ 78%] Building C object src/CMakeFiles/leptonica.dir/recogtrain.c.o
+[ 79%] Building C object src/CMakeFiles/leptonica.dir/regutils.c.o
+[ 79%] Building C object src/CMakeFiles/leptonica.dir/rop.c.o
+[ 80%] Building C object src/CMakeFiles/leptonica.dir/roplow.c.o
+[ 81%] Building C object src/CMakeFiles/leptonica.dir/rotate.c.o
+[ 81%] Building C object src/CMakeFiles/leptonica.dir/rotateam.c.o
+[ 82%] Building C object src/CMakeFiles/leptonica.dir/rotateorth.c.o
+[ 82%] Building C object src/CMakeFiles/leptonica.dir/rotateshear.c.o
+[ 83%] Building C object src/CMakeFiles/leptonica.dir/runlength.c.o
+[ 83%] Building C object src/CMakeFiles/leptonica.dir/sarray1.c.o
+[ 84%] Building C object src/CMakeFiles/leptonica.dir/sarray2.c.o
+[ 84%] Building C object src/CMakeFiles/leptonica.dir/scale1.c.o
+[ 85%] Building C object src/CMakeFiles/leptonica.dir/scale2.c.o
+[ 86%] Building C object src/CMakeFiles/leptonica.dir/seedfill.c.o
+[ 86%] Building C object src/CMakeFiles/leptonica.dir/sel1.c.o
+[ 87%] Building C object src/CMakeFiles/leptonica.dir/sel2.c.o
+[ 87%] Building C object src/CMakeFiles/leptonica.dir/selgen.c.o
+[ 88%] Building C object src/CMakeFiles/leptonica.dir/shear.c.o
+[ 88%] Building C object src/CMakeFiles/leptonica.dir/skew.c.o
+[ 89%] Building C object src/CMakeFiles/leptonica.dir/stack.c.o
+[ 89%] Building C object src/CMakeFiles/leptonica.dir/spixio.c.o
+[ 90%] Building C object src/CMakeFiles/leptonica.dir/stringcode.c.o
+[ 91%] Building C object src/CMakeFiles/leptonica.dir/strokes.c.o
+[ 91%] Building C object src/CMakeFiles/leptonica.dir/sudoku.c.o
+[ 92%] Building C object src/CMakeFiles/leptonica.dir/textops.c.o
+[ 92%] Building C object src/CMakeFiles/leptonica.dir/tiffio.c.o
+[ 93%] Building C object src/CMakeFiles/leptonica.dir/tiffiostub.c.o
+[ 93%] Building C object src/CMakeFiles/leptonica.dir/utils1.c.o
+[ 94%] Building C object src/CMakeFiles/leptonica.dir/warper.c.o
+[ 94%] Building C object src/CMakeFiles/leptonica.dir/utils2.c.o
+[ 95%] Building C object src/CMakeFiles/leptonica.dir/watershed.c.o
+[ 96%] Building C object src/CMakeFiles/leptonica.dir/webpanimio.c.o
+[ 96%] Building C object src/CMakeFiles/leptonica.dir/webpanimiostub.c.o
+[ 97%] Building C object src/CMakeFiles/leptonica.dir/webpio.c.o
+[ 97%] Building C object src/CMakeFiles/leptonica.dir/webpiostub.c.o
+[ 98%] Building C object src/CMakeFiles/leptonica.dir/writefile.c.o
+[ 98%] Building C object src/CMakeFiles/leptonica.dir/zlibmem.c.o
+[ 99%] Building C object src/CMakeFiles/leptonica.dir/zlibmemstub.c.o
+[100%] Linking C static library libleptonica.a
+[100%] Built target leptonica
+Consolidate compiler generated dependencies of target leptonica
+[100%] Built target leptonica
+Install the project...
+-- Install configuration: "Release"
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/lib/pkgconfig/lept.pc
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/cmake/LeptonicaConfig.cmake
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/cmake/LeptonicaConfig-version.cmake
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/cmake/LeptonicaTargets.cmake
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/cmake/LeptonicaTargets-release.cmake
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/array.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/arrayaccess.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/bbuffer.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/bilateral.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/bmf.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/bmfdata.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/bmp.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/ccbord.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/dewarp.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/environ.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/gplot.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/heap.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/jbclass.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/leptwin.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/list.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/morph.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/pix.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/ptra.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/queue.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/rbtree.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/readbarcode.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/recog.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/regutils.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/stack.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/stringcode.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/sudoku.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/watershed.h
+-- Installing: /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/endianness.h
+[g4kz@atn1mg4 build]$ cd /nethome/prosei_d/Prosei/local/tesseract-src && rm -rf build && mkdir build && cd build && PKG_CONFIG_PATH=/nethome/prosei_d/Prosei/local/tesseract/lib64/pkgconfig:$PKG_CONFIG_PATH cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/nethome/prosei_d/Prosei/local/tesseract -DCMAKE_PREFIX_PATH=/nethome/prosei_d/Prosei/local/tesseract -DBUILD_TRAINING_TOOLS=OFF && make -j8 && make install
 -- The C compiler identification is GNU 6.2.0
 -- The CXX compiler identification is GNU 6.2.0
 -- Detecting C compiler ABI info
@@ -176,14 +487,13 @@ Configuring tesseract version 4.1.1...
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /nethome/prosei_d/Prosei/local/tesseract-src/build
-[g4kz@atn1mg4 build]$ cd /nethome/prosei_d/Prosei/local/tesseract-src/build && make -j8 && make install
 [  0%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/adaptions.cpp.o
 [  0%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/applybox.cpp.o
-[  1%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/control.cpp.o
+[  1%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/fixspace.cpp.o
 [  1%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/docqual.cpp.o
-[  2%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/fixspace.cpp.o
-[  2%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/equationdetect.cpp.o
-[  2%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/fixxht.cpp.o
+[  3%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/control.cpp.o
+[  3%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/fixxht.cpp.o
+[  3%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/equationdetect.cpp.o
 [  3%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/linerec.cpp.o
 [  3%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/ltrresultiterator.cpp.o
 [  4%] Building CXX object CMakeFiles/libtesseract.dir/src/ccmain/mutableiterator.cpp.o
@@ -214,15 +524,15 @@ Configuring tesseract version 4.1.1...
 [ 14%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/boxread.cpp.o
 [ 15%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/boxword.cpp.o
 [ 15%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/ccstruct.cpp.o
-[ 15%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/coutln.cpp.o
+[ 16%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/coutln.cpp.o
 [ 16%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/detlinefit.cpp.o
+[ 16%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/dppoint.cpp.o
 [ 17%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/fontinfo.cpp.o
-[ 17%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/dppoint.cpp.o
 [ 17%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/imagedata.cpp.o
+[ 17%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/matrix.cpp.o
 [ 18%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/linlsq.cpp.o
-[ 18%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/matrix.cpp.o
-[ 18%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/mod128.cpp.o
 [ 19%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/normalis.cpp.o
+[ 19%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/mod128.cpp.o
 [ 19%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/ocrblock.cpp.o
 [ 20%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/ocrpara.cpp.o
 [ 20%] Building CXX object CMakeFiles/libtesseract.dir/src/ccstruct/ocrrow.cpp.o
@@ -257,11 +567,11 @@ Configuring tesseract version 4.1.1...
 [ 33%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/params.cpp.o
 [ 33%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/scanutils.cpp.o
 [ 33%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/serialis.cpp.o
+[ 33%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/tessdatamanager.cpp.o
 [ 34%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/strngs.cpp.o
-[ 34%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/tessdatamanager.cpp.o
 [ 34%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/tprintf.cpp.o
-[ 35%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/unichar.cpp.o
 [ 35%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/unicharcompress.cpp.o
+[ 35%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/unichar.cpp.o
 [ 36%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/unicharmap.cpp.o
 [ 36%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/unicharset.cpp.o
 [ 36%] Building CXX object CMakeFiles/libtesseract.dir/src/ccutil/unicodes.cpp.o
@@ -269,8 +579,8 @@ Configuring tesseract version 4.1.1...
 [ 37%] Building CXX object CMakeFiles/libtesseract.dir/src/classify/adaptive.cpp.o
 [ 38%] Building CXX object CMakeFiles/libtesseract.dir/src/classify/adaptmatch.cpp.o
 [ 38%] Building CXX object CMakeFiles/libtesseract.dir/src/classify/blobclass.cpp.o
-[ 39%] Building CXX object CMakeFiles/libtesseract.dir/src/classify/cluster.cpp.o
 [ 39%] Building CXX object CMakeFiles/libtesseract.dir/src/classify/classify.cpp.o
+[ 39%] Building CXX object CMakeFiles/libtesseract.dir/src/classify/cluster.cpp.o
 [ 39%] Building CXX object CMakeFiles/libtesseract.dir/src/classify/clusttool.cpp.o
 [ 40%] Building CXX object CMakeFiles/libtesseract.dir/src/classify/cutoffs.cpp.o
 [ 40%] Building CXX object CMakeFiles/libtesseract.dir/src/classify/featdefs.cpp.o
@@ -299,8 +609,8 @@ Configuring tesseract version 4.1.1...
 [ 50%] Building CXX object CMakeFiles/libtesseract.dir/src/classify/tessclassifier.cpp.o
 [ 50%] Building CXX object CMakeFiles/libtesseract.dir/src/classify/trainingsample.cpp.o
 [ 51%] Building CXX object CMakeFiles/libtesseract.dir/src/classify/trainingsampleset.cpp.o
-[ 51%] Building CXX object CMakeFiles/libtesseract.dir/src/cutil/callcpp.cpp.o
 [ 52%] Building CXX object CMakeFiles/libtesseract.dir/src/cutil/cutil_class.cpp.o
+[ 52%] Building CXX object CMakeFiles/libtesseract.dir/src/cutil/callcpp.cpp.o
 [ 52%] Building CXX object CMakeFiles/libtesseract.dir/src/cutil/emalloc.cpp.o
 [ 52%] Building CXX object CMakeFiles/libtesseract.dir/src/cutil/oldlist.cpp.o
 [ 53%] Building CXX object CMakeFiles/libtesseract.dir/src/dict/context.cpp.o
@@ -312,8 +622,8 @@ Configuring tesseract version 4.1.1...
 [ 55%] Building CXX object CMakeFiles/libtesseract.dir/src/dict/stopper.cpp.o
 [ 56%] Building CXX object CMakeFiles/libtesseract.dir/src/dict/trie.cpp.o
 [ 56%] Building CXX object CMakeFiles/libtesseract.dir/src/lstm/convolve.cpp.o
-[ 56%] Building CXX object CMakeFiles/libtesseract.dir/src/lstm/fullyconnected.cpp.o
 [ 57%] Building CXX object CMakeFiles/libtesseract.dir/src/lstm/ctc.cpp.o
+[ 57%] Building CXX object CMakeFiles/libtesseract.dir/src/lstm/fullyconnected.cpp.o
 [ 57%] Building CXX object CMakeFiles/libtesseract.dir/src/lstm/functions.cpp.o
 [ 58%] Building CXX object CMakeFiles/libtesseract.dir/src/lstm/input.cpp.o
 [ 58%] Building CXX object CMakeFiles/libtesseract.dir/src/lstm/lstm.cpp.o
@@ -347,201 +657,188 @@ Configuring tesseract version 4.1.1...
 [ 70%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/devanagari_processing.cpp.o
 [ 71%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/drawtord.cpp.o
 [ 71%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/edgblob.cpp.o
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp: In member function ‘bool tesseract::ShiroRekhaSplitter::Split(bool, tesseract::DebugPixa*)’:
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:132:19: error: invalid use of incomplete type ‘struct Pixa’
-     Box* box = ccs->boxa->box[i];
-                   ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:52:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/bmf.h:48:12: note: forward declaration of struct Pixa’
-     struct Pixa  *pixa;        /*!< pixa of bitmaps for 93 characters        */
-            ^~~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:145:13: error: invalid use of incomplete type ‘struct Box’
-         (box->w > xheight / 3 && box->h > xheight / 2)) {
-             ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:145:37: error: invalid use of incomplete type ‘struct Box’
-         (box->w > xheight / 3 && box->h > xheight / 2)) {
-                                     ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:147:30: error: invalid use of incomplete type ‘struct Box’
-                           box->x, box->y, regions_to_clear);
-                              ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:147:38: error: invalid use of incomplete type ‘struct Box’
-                           box->x, box->y, regions_to_clear);
-                                      ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:150:18: error: invalid use of incomplete type ‘struct Box’
-               box->x, box->y, box->w, box->h);
-                  ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:150:26: error: invalid use of incomplete type ‘struct Box’
-               box->x, box->y, box->w, box->h);
-                          ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:150:34: error: invalid use of incomplete type ‘struct Box’
-               box->x, box->y, box->w, box->h);
-                                  ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:150:42: error: invalid use of incomplete type ‘struct Box’
-               box->x, box->y, box->w, box->h);
-                                          ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp: In member function ‘int tesseract::ShiroRekhaSplitter::GetXheightForCC(Box*)’:
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:182:20: error: invalid use of incomplete type ‘struct Box’
-   TBOX bbox(cc_bbox->x,
-                    ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:183:46: error: invalid use of incomplete type ‘struct Box’
-             pixGetHeight(orig_pix_) - cc_bbox->y - cc_bbox->h - 1,
-                                              ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:183:59: error: invalid use of incomplete type ‘struct Box’
-             pixGetHeight(orig_pix_) - cc_bbox->y - cc_bbox->h - 1,
-                                                           ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:184:20: error: invalid use of incomplete type ‘struct Box’
-             cc_bbox->x + cc_bbox->w,
-                    ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:184:33: error: invalid use of incomplete type ‘struct Box’
-             cc_bbox->x + cc_bbox->w,
-                                 ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:185:46: error: invalid use of incomplete type ‘struct Box’
-             pixGetHeight(orig_pix_) - cc_bbox->y - 1);
-                                              ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp: In member function ‘void tesseract::ShiroRekhaSplitter::SplitWordShiroRekha(tesseract::ShiroRekhaSplitter::SplitStrategy, Pix*, int, int, int, Boxa*)’:
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:290:15: error: invalid use of incomplete type ‘struct Box’
-   box_to_clear->y = shirorekha_bottom + leeway_to_keep;
-               ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:291:15: error: invalid use of incomplete type ‘struct Box’
-   box_to_clear->h = height - box_to_clear->y;
-               ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:291:42: error: invalid use of incomplete type ‘struct Box’
-   box_to_clear->h = height - box_to_clear->y;
-                                          ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp: In static member function ‘static int tesseract::ShiroRekhaSplitter::GetModeHeight(Pix*)’:
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:416:12: error: invalid use of incomplete type ‘struct Box’
-     if (box->h >= 3 || box->w >= 3) {
-            ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:416:27: error: invalid use of incomplete type ‘struct Box’
-     if (box->h >= 3 || box->w >= 3) {
-                           ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-/nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:417:22: error: invalid use of incomplete type ‘struct Box’
-       heights.add(box->h, 1);
-                      ^~
-In file included from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/alltypes.h:57:0,
-                 from /nethome/prosei_d/Prosei/local/tesseract/include/leptonica/allheaders.h:35,
-                 from /nethome/prosei_d/Prosei/local/tesseract-src/src/textord/devanagari_processing.cpp:25:
-/nethome/prosei_d/Prosei/local/tesseract/include/leptonica/imageio.h:241:12: note: forward declaration of ‘struct Box’
-     struct Box        *mediabox;     /*!< bounding region for all images      */
-            ^~~
-make[2]: *** [CMakeFiles/libtesseract.dir/build.make:2414: CMakeFiles/libtesseract.dir/src/textord/devanagari_processing.cpp.o] Error 1
-make[2]: *** Waiting for unfinished jobs....
+[ 71%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/edgloop.cpp.o
+[ 72%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/equationdetectbase.cpp.o
+[ 72%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/fpchop.cpp.o
+[ 73%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/gap_map.cpp.o
+[ 73%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/imagefind.cpp.o
+[ 73%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/linefind.cpp.o
+[ 74%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/makerow.cpp.o
+[ 74%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/oldbasel.cpp.o
+[ 75%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/pithsync.cpp.o
+[ 75%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/pitsync1.cpp.o
+[ 76%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/scanedg.cpp.o
+[ 76%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/sortflts.cpp.o
+[ 76%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/strokewidth.cpp.o
+[ 77%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/tabfind.cpp.o
+[ 77%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/tablefind.cpp.o
+[ 78%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/tablerecog.cpp.o
+[ 78%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/tabvector.cpp.o
+[ 78%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/textlineprojection.cpp.o
+[ 79%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/textord.cpp.o
+[ 79%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/topitch.cpp.o
+[ 80%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/tordmain.cpp.o
+[ 80%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/tospace.cpp.o
+[ 81%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/tovars.cpp.o
+[ 81%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/underlin.cpp.o
+[ 81%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/wordseg.cpp.o
+[ 82%] Building CXX object CMakeFiles/libtesseract.dir/src/textord/workingpartset.cpp.o
+[ 82%] Building CXX object CMakeFiles/libtesseract.dir/src/viewer/scrollview.cpp.o
+[ 83%] Building CXX object CMakeFiles/libtesseract.dir/src/viewer/svmnode.cpp.o
+[ 83%] Building CXX object CMakeFiles/libtesseract.dir/src/viewer/svpaint.cpp.o
+[ 84%] Building CXX object CMakeFiles/libtesseract.dir/src/viewer/svutil.cpp.o
+[ 84%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/associate.cpp.o
+[ 84%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/chop.cpp.o
+[ 85%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/chopper.cpp.o
+[ 85%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/drawfx.cpp.o
+[ 86%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/findseam.cpp.o
+[ 86%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/gradechop.cpp.o
+[ 86%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/language_model.cpp.o
+[ 87%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/lm_consistency.cpp.o
+[ 87%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/lm_pain_points.cpp.o
+[ 88%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/lm_state.cpp.o
+[ 88%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/outlines.cpp.o
+[ 89%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/params_model.cpp.o
+[ 89%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/pieces.cpp.o
+[ 89%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/plotedges.cpp.o
+[ 90%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/render.cpp.o
+[ 90%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/segsearch.cpp.o
+[ 91%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/tface.cpp.o
+[ 91%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/wordclass.cpp.o
+[ 92%] Building CXX object CMakeFiles/libtesseract.dir/src/wordrec/wordrec.cpp.o
+[ 92%] Building CXX object CMakeFiles/libtesseract.dir/src/api/baseapi.cpp.o
+[ 92%] Building CXX object CMakeFiles/libtesseract.dir/src/api/capi.cpp.o
+[ 93%] Building CXX object CMakeFiles/libtesseract.dir/src/api/renderer.cpp.o
+[ 93%] Building CXX object CMakeFiles/libtesseract.dir/src/api/altorenderer.cpp.o
+[ 94%] Building CXX object CMakeFiles/libtesseract.dir/src/api/hocrrenderer.cpp.o
+[ 94%] Building CXX object CMakeFiles/libtesseract.dir/src/api/lstmboxrenderer.cpp.o
+[ 94%] Building CXX object CMakeFiles/libtesseract.dir/src/api/pdfrenderer.cpp.o
+[ 95%] Building CXX object CMakeFiles/libtesseract.dir/src/api/wordstrboxrenderer.cpp.o
+[ 95%] Building CXX object CMakeFiles/libtesseract.dir/src/arch/dotproduct.cpp.o
+[ 96%] Building CXX object CMakeFiles/libtesseract.dir/src/arch/simddetect.cpp.o
+[ 96%] Building CXX object CMakeFiles/libtesseract.dir/src/arch/intsimdmatrix.cpp.o
+[ 97%] Building CXX object CMakeFiles/libtesseract.dir/src/arch/dotproductavx.cpp.o
+[ 97%] Building CXX object CMakeFiles/libtesseract.dir/src/arch/intsimdmatrixavx2.cpp.o
+[ 97%] Building CXX object CMakeFiles/libtesseract.dir/src/arch/dotproductfma.cpp.o
+[ 98%] Building CXX object CMakeFiles/libtesseract.dir/src/arch/dotproductsse.cpp.o
+[ 98%] Building CXX object CMakeFiles/libtesseract.dir/src/arch/intsimdmatrixsse.cpp.o
+[ 99%] Linking CXX shared library libtesseract.so
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(binreduce.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(bmf.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(boxbasic.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(boxfunc2.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(boxfunc4.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(conncomp.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(convolve.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(encoding.c.o): relocation R_X86_64_32S against `.rodata.str1.8' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(fpix1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(fpix2.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(graphics.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(grayquant.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(kernel.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(morph.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(numabasic.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(numafunc1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pageseg.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pdfio1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pdfio2.c.o): relocation R_X86_64_32 against `.rodata.str1.1' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pix1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pix2.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pix3.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pix4.c.o): relocation R_X86_64_32 against `.rodata.str1.1' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pix5.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pixabasic.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pixafunc1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pixafunc2.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pixarith.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pixcomp.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pixconv.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pixtiling.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pngio.c.o): relocation R_X86_64_32 against `.rodata.str1.8' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(projective.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(ptabasic.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(ptafunc1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(ptafunc2.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(ptra.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(readfile.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(rop.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(roplow.c.o): relocation R_X86_64_32S against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(rotate.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(rotateam.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(rotateorth.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(rotateshear.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(runlength.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(sarray1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(sarray2.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(scale1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(scale2.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(seedfill.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(sel1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(shear.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(skew.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(spixio.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(stack.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(stringcode.c.o): relocation R_X86_64_32 against `.rodata.str1.1' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(textops.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(tiffio.c.o): relocation R_X86_64_32 against `.rodata.str1.8' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(utils1.c.o): relocation R_X86_64_32 against `.rodata.str1.1' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(utils2.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(webpio.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(writefile.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(zlibmem.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(adaptmap.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(affine.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(bbuffer.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(binexpand.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(blend.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(bmpio.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(boxfunc1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(boxfunc3.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(bytearray.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(ccbord.c.o): relocation R_X86_64_32S against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(colorcontent.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(colormap.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(colorquant1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(colorseg.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(colorspace.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(compare.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(correlscore.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(dnabasic.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(dnafunc1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(dnahash.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(edge.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(enhance.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(gifio.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(gplot.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(graymorph.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(heap.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(jp2kheader.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(jp2kiostub.c.o): relocation R_X86_64_32 against `.rodata.str1.1' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(jpegio.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(map.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(morphapp.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(morphseq.c.o): relocation R_X86_64_32 against `.rodata.str1.1' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(numafunc2.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(paintcmap.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pixacc.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(pnmio.c.o): relocation R_X86_64_32 against `.rodata.str1.1' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(psio2.c.o): relocation R_X86_64_32 against `.rodata.str1.1' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(queue.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(rbtree.c.o): relocation R_X86_64_32 against `.rodata.str1.1' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(coloring.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(colormorph.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(morphdwa.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(sel2.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(dwacomb.2.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(dwacomblow.2.c.o): relocation R_X86_64_32S against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(fmorphgen.1.c.o): relocation R_X86_64_32 against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: /nethome/prosei_d/Prosei/local/tesseract/lib/libleptonica.a(fmorphgenlow.1.c.o): relocation R_X86_64_32S against `.rodata' can not be used when making a shared object; recompile with -fPIC
+/usr/bin/ld: final link failed: Nonrepresentable section on output
+collect2: error: ld returned 1 exit status
+make[2]: *** [CMakeFiles/libtesseract.dir/build.make:3841: libtesseract.so.4.1.1] Error 1
 make[1]: *** [CMakeFiles/Makefile2:86: CMakeFiles/libtesseract.dir/all] Error 2
 make: *** [Makefile:136: all] Error 2
+[g4kz@atn1mg4 build]$ /nethome/prosei_d/Prosei/local/tesseract/bin/tesseract --version
+-bash: /nethome/prosei_d/Prosei/local/tesseract/bin/tesseract: No such file or directory
 [g4kz@atn1mg4 build]$
+
